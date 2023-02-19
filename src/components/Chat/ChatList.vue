@@ -108,14 +108,20 @@ const newMsg = async (id: string, msg: string): Promise<void> => {
 
 // 聊天列表页下拉刷新的回调函数
 const onRefresh = () => {
-  socket.connect();
-  socket.emit("online-message", (socket as any).uid);
-  setTimeout(() => {
-    if (loading.value === true) {
-      showToast("刷新失败");
-      loading.value = false;
-    }
-  }, 1000 * 10);
+  if (socket.connected) {
+    loading.value = false;
+    store.changeOnlineStatus(true);
+  } else {
+    socket.connect();
+    socket.emit("online-message", (socket as any).uid);
+
+    setTimeout(() => {
+      if (loading.value === true) {
+        showToast("刷新失败");
+        loading.value = false;
+      }
+    }, 1000 * 5);
+  }
 };
 
 // 点击关闭按钮的回调
@@ -195,9 +201,9 @@ onMounted(async () => {
 
   // 监听在线状态
   socket.on("online-message-reply-own", (isOnline: boolean) => {
-    // 刷新成功
-    console.log("刷新成功");
-    loading.value = !isOnline;
+    // 刷新成功 关闭下拉
+    if (isOnline) loading.value = false;
+    else socket.emit("online-message", (socket as any).uid);
   });
 
   // 监听消息

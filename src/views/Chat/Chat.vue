@@ -2,7 +2,7 @@
 export default { name: "meetuChat" };
 </script>
 <script setup lang="ts">
-import { ref, inject, onMounted, watchEffect } from "vue";
+import { ref, inject } from "vue";
 import { useStore } from "@/stores";
 import {
   NavBar as vanNavBar,
@@ -15,7 +15,6 @@ import type { Socket } from "socket.io-client";
 
 const store = useStore();
 const socket: Socket = inject("socket") as Socket;
-const isOnline = ref<boolean>(false);
 const showPopover = ref<boolean>(false);
 const actions: Array<{ text: string; icon: string }> = [
   { text: "在线", icon: "checked" },
@@ -36,14 +35,8 @@ const reload = () => {
   location.reload();
 };
 
-onMounted(() => {
-  socket.on("online-message-reply-own", (isOnline) => {
-    store.changeOnlineStatus(isOnline);
-  });
-});
-
-watchEffect(() => {
-  isOnline.value = store.onlineStatus;
+socket.on("online-message-reply-own", (isOnline) => {
+  store.changeOnlineStatus(isOnline);
 });
 </script>
 
@@ -61,12 +54,15 @@ watchEffect(() => {
         <template #reference>
           <div class="online-icon-box">
             <van-icon
-              :class="{ 'online-icon': isOnline, 'offline-icon': !isOnline }"
-              :name="isOnline ? 'checked' : 'clear'"
+              :class="{
+                'online-icon': store.onlineStatus,
+                'offline-icon': !store.onlineStatus,
+              }"
+              :name="store.onlineStatus ? 'checked' : 'clear'"
               size="25"
               style="padding-right: 5px"
             />
-            {{ isOnline ? "在线" : "离线" }}
+            {{ store.onlineStatus ? "在线" : "离线" }}
           </div>
         </template>
       </van-popover>

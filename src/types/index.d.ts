@@ -37,3 +37,17 @@ export declare interface Post {
   updated_time: string;
   pictures: Picture[];
 }
+
+export declare interface Message {
+  id: number;
+  profile: string;
+  to: "own" | "other";
+  type: "string" | "photo" | "video";
+  msg: string;
+}
+
+export declare interface Info {
+  id?: string;
+  username?: string;
+  profile?: string;
+}

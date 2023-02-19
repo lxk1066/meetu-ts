@@ -27,20 +27,8 @@ import { getAllMessages } from "@/utils/IndexedDB/getAllMessages";
 import { putMessageReaded } from "@/utils/IndexedDB/putMessageReaded";
 
 import type { Socket } from "socket.io-client";
+import type { Message, Info } from "@/types";
 
-interface Info {
-  id?: string;
-  username?: string;
-  profile?: string;
-}
-
-interface Message {
-  id: number;
-  profile: string;
-  to: "own" | "other";
-  type: "string" | "photo" | "video";
-  msg: string;
-}
 const store = useStore();
 const ownInfo: Info = reactive({});
 const otherInfo: Info = reactive({});
@@ -63,18 +51,18 @@ const onClickLeft = () => {
 onBeforeMount(async () => {
   // 验证jwt_token
   const token = localStorage.getItem("meetu_jwt_token");
-  const myid = localStorage.getItem("meetu_uid");
-  if (token && myid) {
+  const myId = localStorage.getItem("meetu_uid");
+  if (token && myId) {
     const { data: res } = await verifyToken(token);
     if (res.code !== 200) await router.push("/");
   } else {
     await router.push("/");
   }
   // 获取自己的个人信息
-  const { data: myRes } = await getPersonInfo(myid as string);
+  const { data: myRes } = await getPersonInfo(myId as string);
   if (myRes.code === 200) {
     const data = myRes.data;
-    ownInfo.id = myid as string;
+    ownInfo.id = myId as string;
     ownInfo.username = data.username;
     ownInfo.profile = data.profile;
   }
@@ -100,7 +88,7 @@ onBeforeMount(async () => {
   socket.on("online-message-reply-own", (isOnline) => {
     anotherIsOnline.value = isOnline;
   });
-  socket.on(`online-message-reply-${myid}`, (isOnline) => {
+  socket.on(`online-message-reply-${myId}`, (isOnline) => {
     anotherIsOnline.value = isOnline;
   });
   // 每隔一分钟就更新一次对方的在线状态
@@ -254,7 +242,7 @@ onBeforeUnmount(() => {
       <h4 class="nav-bar-username" @click="openDetail('own')">
         {{ otherInfo.username }}
       </h4>
-      <div v-show="store.onlineStatus">
+      <div v-show="store.onlineStatus && otherInfo.username">
         <p v-if="anotherIsOnline" class="nav-bar-online-status">
           <van-icon name="checked" />在线
         </p>
