@@ -1,0 +1,96 @@
+<script lang="ts">
+export default { name: "meetuChat" };
+</script>
+<script setup lang="ts">
+import { ref, inject, onMounted, watchEffect } from "vue";
+import { useStore } from "@/stores";
+import {
+  NavBar as vanNavBar,
+  Icon as vanIcon,
+  Popover as vanPopover,
+} from "vant";
+import ChatList from "@/components/Chat/ChatList.vue";
+
+import type { Socket } from "socket.io-client";
+
+const store = useStore();
+const socket: Socket = inject("socket") as Socket;
+const isOnline = ref<boolean>(false);
+const showPopover = ref<boolean>(false);
+const actions: Array<{ text: string; icon: string }> = [
+  { text: "在线", icon: "checked" },
+  { text: "离线", icon: "clear" },
+];
+
+const onSelect = (action: any): void => {
+  if (action.text === "在线") {
+    socket.connect();
+    socket.emit("online-message", (socket as any).uid);
+  } else if (action.text === "离线") {
+    socket.disconnect();
+    store.changeOnlineStatus(false);
+  }
+};
+
+const reload = () => {
+  location.reload();
+};
+
+onMounted(() => {
+  socket.on("online-message-reply-own", (isOnline) => {
+    store.changeOnlineStatus(isOnline);
+  });
+});
+
+watchEffect(() => {
+  isOnline.value = store.onlineStatus;
+});
+</script>
+
+<template>
+  <van-nav-bar title="聊天" fixed placeholder z-index="2">
+    <template #left>
+      <van-popover
+        v-model:show="showPopover"
+        :actions="actions"
+        @select="onSelect"
+        placement="bottom-start"
+        :offset="[0, -3]"
+        style="width: 90px"
+      >
+        <template #reference>
+          <div class="online-icon-box">
+            <van-icon
+              :class="{ 'online-icon': isOnline, 'offline-icon': !isOnline }"
+              :name="isOnline ? 'checked' : 'clear'"
+              size="25"
+              style="padding-right: 5px"
+            />
+            {{ isOnline ? "在线" : "离线" }}
+          </div>
+        </template>
+      </van-popover>
+    </template>
+    <template #right>
+      <van-icon name="replay" size="25" @click="reload" />
+    </template>
+  </van-nav-bar>
+  <ChatList />
+</template>
+
+<style>
+.online-icon-box {
+  width: 80px;
+  height: 50px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  z-index: 2;
+}
+.online-icon {
+  color: lightgreen !important;
+}
+.offline-icon {
+  color: #c08989 !important;
+}
+</style>
