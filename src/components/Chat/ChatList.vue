@@ -203,7 +203,6 @@ onMounted(async () => {
   socket.on("online-message-reply-own", (isOnline: boolean) => {
     // 刷新成功 关闭下拉
     if (isOnline) loading.value = false;
-    else socket.emit("online-message", (socket as any).uid);
   });
 
   // 监听消息

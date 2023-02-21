@@ -66,7 +66,7 @@ const getIndexedData = (source: friend[]) => {
   source.forEach((item) => {
     const name = item.username;
     // 获取每一个name值第一个字的大写首字母（传入的 name 是中文时默认得到大写字母，name 是英文时按照原字符串输出，可能是小写）
-    const initial: string = pinyin(name, {
+    const initial: string = pinyin(name[0], {
       toneType: "none",
       type: "array",
     })[0]

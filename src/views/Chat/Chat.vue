@@ -36,7 +36,8 @@ const reload = () => {
 };
 
 socket.on("online-message-reply-own", (isOnline) => {
-  store.changeOnlineStatus(isOnline);
+  if (isOnline) store.changeOnlineStatus(isOnline);
+  else socket.emit("online-message", (socket as any).uid);
 });
 </script>
 

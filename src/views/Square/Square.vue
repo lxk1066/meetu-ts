@@ -16,6 +16,7 @@ import Post from "@/components/Square/Post.vue";
 import getPostList from "@/api/square/getPostList";
 import getMuidUserInfo from "@/api/user/getMuidUserInfo";
 import type { Post as PostBox } from "@/types";
+import type { PopoverAction } from "vant";
 
 const router = useRouter();
 const loading = ref<boolean>(false);
@@ -23,7 +24,10 @@ const listLoading = ref<boolean>(false);
 const listFinished = ref<boolean>(false);
 const showPopover = ref<boolean>(false);
 const postList = ref<PostBox[]>([]);
-const actions = [{ text: "图文", icon: "photo" }];
+const actions = [
+  { text: "图文", icon: "photo" },
+  { text: "拍照", icon: "photograph" },
+];
 
 onMounted(async () => {
   loading.value = true;
@@ -55,8 +59,8 @@ const loadUserInfo = async () => {
     }
   }
 };
-const onSelect = () => {
-  router.push({ name: "pubPost" });
+const onSelect = (action: PopoverAction, index: number) => {
+  if (index === 0) router.push({ name: "pubPost" });
 };
 const onRefresh = async () => {
   // 下拉刷新
@@ -114,7 +118,8 @@ const onLoad = async () => {
         <h3>广场</h3>
       </div>
       <div class="header-right">
-        <van-icon name="photograph" size="25" />
+        <!-- <van-icon name="photograph" size="25" /> -->
+        <van-icon name="ellipsis" class="ellipsis" />
       </div>
     </div>
     <div class="square-main">
@@ -173,6 +178,11 @@ const onLoad = async () => {
     .header-left,
     .header-right {
       margin: 0 10px;
+      .ellipsis {
+        transform: rotate(90deg);
+        font-size: 20px;
+        font-weight: bolder;
+      }
     }
   }
   .square-main {

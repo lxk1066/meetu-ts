@@ -26,7 +26,6 @@ const onLogin = async () => {
     loginLoading.value = false;
     localStorage.setItem("meetu_jwt_token", res.token);
     localStorage.setItem("meetu_uid", res.uid);
-    console.log("登录成功");
     router.push("/");
   } else {
     loginLoading.value = false;
