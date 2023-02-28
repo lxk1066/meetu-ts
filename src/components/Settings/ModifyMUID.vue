@@ -1,5 +1,5 @@
 <script setup lang="ts" name="meetuModifyMUID">
-import { ref, watch, defineProps, defineEmits } from "vue";
+import { ref, defineProps, defineEmits } from "vue";
 import modifyUserMUID from "@/api/user/modifyUserMUID";
 import {
   Popup as vanPopup,
@@ -22,11 +22,9 @@ const btnIsDisable = ref<boolean>(false); // 点击修改按钮后禁用按钮�
 const ownMuid = ref(props.muid);
 const muidPattern = /^[a-z0-9]{6,10}$/;
 
-watch(isShow, (newVal) => {
-  if (!newVal) {
-    emits("closePopup");
-  }
-});
+const closePopup = () => {
+  !isShow.value && emits("closePopup");
+};
 const modifyMUID = async () => {
   btnIsDisable.value = true;
   if (muidPattern.test(ownMuid.value)) {
@@ -66,6 +64,7 @@ const modifyMUID = async () => {
     :style="{ backgroundColor: '#efefef', height: '50%' }"
     duration="0.25"
     transition-appear
+    @closed="closePopup"
   >
     <h4 style="text-align: center">修改MUID</h4>
     <van-cell-group inset>

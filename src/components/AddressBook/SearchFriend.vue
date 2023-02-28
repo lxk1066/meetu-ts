@@ -31,7 +31,7 @@ const searchResult = reactive<Array<UserInfo>>([]);
 const resultIsEmpty = ref<boolean>(false);
 
 const closePopup = (): void => {
-  emits("closePopup");
+  !isShow.value && emits("closePopup");
 };
 const search = async (): Promise<void> => {
   if (resultIsEmpty.value) resultIsEmpty.value = false;
@@ -70,6 +70,8 @@ const search = async (): Promise<void> => {
     closeable
     close-icon="close"
     position="bottom"
+    duration="0.25"
+    transition-appear
     @closed="closePopup"
     :style="{ height: '80%', backgroundColor: '#efefef' }"
   >
@@ -84,6 +86,7 @@ const search = async (): Promise<void> => {
         >
           <template #button>
             <van-button
+              class="search-btn"
               size="small"
               type="primary"
               :disabled="searchBtnDisable"
@@ -134,6 +137,9 @@ const search = async (): Promise<void> => {
 </template>
 
 <style scoped>
+.search-btn {
+  width: 50px;
+}
 .user-card-group {
   margin-top: 5px;
   background-color: #efefef;

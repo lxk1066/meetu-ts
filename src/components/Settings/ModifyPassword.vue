@@ -1,5 +1,5 @@
 <script setup lang="ts" name="meetuModifyPassword">
-import { ref, watch, defineEmits, defineProps } from "vue";
+import { ref, defineEmits, defineProps } from "vue";
 import { Popup as vanPopup, Button as vanButton, showToast } from "vant";
 import sendModifyPasswordEmail from "@/api/user/modifyPassword";
 
@@ -14,11 +14,9 @@ const props = defineProps<{
   email: string;
 }>();
 
-watch(isShow, (newVal) => {
-  if (!newVal) {
-    emits("closePopup");
-  }
-});
+const closePopup = () => {
+  !isShow.value && emits("closePopup");
+};
 
 const sendEmail = async () => {
   sendBtnIsDisable.value = true;
@@ -46,6 +44,7 @@ const sendEmail = async () => {
     :style="{ backgroundColor: '#efefef', height: '40%' }"
     duration="0.25"
     transition-appear
+    @closed="closePopup"
   >
     <h4 style="text-align: center">修改密码</h4>
     <p class="tips">

@@ -1,5 +1,5 @@
 <script setup lang="ts" name="meetuModifyMailbox">
-import { ref, watch, defineEmits, defineProps } from "vue";
+import { ref, defineEmits, defineProps } from "vue";
 import {
   Button as vanButton,
   Popup as vanPopup,
@@ -28,11 +28,9 @@ const emailVerifyCodeBtnDisable = ref<boolean>(false);
 const sendVerifyCodeBtn = ref<HTMLElement | null>(null);
 const emailVerifyCodeBtnText = ref<string>("发送验证码");
 
-watch(isShow, (newVal) => {
-  if (!newVal) {
-    emits("closePopup");
-  }
-});
+const closePopup = () => {
+  !isShow.value && emits("closePopup");
+};
 // const emailPattern = (val: string) => {
 //   if (!/^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/.test(val)) {
 //     return "邮箱不合法，请重新输入";
@@ -86,6 +84,7 @@ const modifyEmail = async () => {
     :style="{ backgroundColor: '#efefef', height: '60%' }"
     duration="0.25"
     transition-appear
+    @closed="closePopup"
   >
     <h4 style="text-align: center">修改邮箱地址</h4>
     <p class="tips">
