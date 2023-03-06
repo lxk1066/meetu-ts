@@ -64,8 +64,8 @@ const sendRequest = async () => {
           loading-icon="user-circle-o"
           fit="cover"
         />
-        <h4 class="username">{{ (info as UserInfo).username }}</h4>
-        <p class="van-ellipsis">个性签名：{{ (info as UserInfo).sign }}</p>
+        <h4 class="username">{{ info?.username ? info.username : "" }}</h4>
+        <p class="van-ellipsis">个性签名：{{ info?.sign }}</p>
       </template>
     </van-cell>
     <van-cell-group inset>

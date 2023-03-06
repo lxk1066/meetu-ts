@@ -118,15 +118,15 @@ onBeforeUnmount(() => {
                 params: { uid: (postData as Post).uid },
               })
             "
-            :src="getProfile((postData as Post).profile as string)"
+            :src="getProfile(postData?.profile ?? 'default.png')"
             :style="{ display: 'inline-block' }"
           />
           <div class="header-left-right">
-            <span class="username">{{ (postData as Post).username }}</span>
+            <span class="username">{{ postData?.username }}</span>
             <span class="updated-time">
               {{
-                (postData as Post).updated_time
-                  ? formatTimeStamp((postData as Post).updated_time, "auto")
+                postData?.updated_time
+                  ? formatTimeStamp(postData?.updated_time ?? "", "auto")
                   : ""
               }}
             </span>
@@ -137,14 +137,14 @@ onBeforeUnmount(() => {
         </div>
       </div>
       <div class="post-content">
-        <h3>{{ (postData as Post).title }}</h3>
-        <p>{{ (postData as Post).content }}</p>
+        <h3>{{ postData?.title }}</h3>
+        <p>{{ postData?.content }}</p>
         <div class="picture" ref="picturesRef">
           <van-image
             width="95%"
             fit="cover"
             @load="pictureLoad"
-            v-for="picture in (postData as Post).pictures"
+            v-for="picture in postData?.pictures"
             :key="picture.pic_id"
             :src="getPicture(picture.pic_name)"
             class="picture-item"

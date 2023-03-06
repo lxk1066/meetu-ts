@@ -101,7 +101,7 @@ const search = async (): Promise<void> => {
         image="search"
         description="未找到该MUID的用户"
       />
-      <van-cell-group class="user-card-group" inset>
+      <van-cell-group class="user-card-group" inset v-else>
         <van-cell
           class="user-card"
           v-for="item in searchResult"
@@ -137,10 +137,18 @@ const search = async (): Promise<void> => {
 </template>
 
 <style scoped>
+h2 {
+  height: 30px;
+}
+h2 + div {
+  height: 55px;
+}
 .search-btn {
   width: 50px;
 }
 .user-card-group {
+  height: calc(100% - 30px - 55px);
+  overflow: auto;
   margin-top: 5px;
   background-color: #efefef;
 }
