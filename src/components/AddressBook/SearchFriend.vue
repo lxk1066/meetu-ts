@@ -141,13 +141,13 @@ h2 {
   height: 30px;
 }
 h2 + div {
-  height: 55px;
+  height: 50px;
 }
 .search-btn {
   width: 50px;
 }
 .user-card-group {
-  height: calc(100% - 30px - 55px);
+  height: calc(100% - 30px - 100px);
   overflow: auto;
   margin-top: 5px;
   background-color: #efefef;

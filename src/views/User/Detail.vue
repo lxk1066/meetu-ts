@@ -4,25 +4,28 @@ export default { name: "meetuDetail" };
 <script setup lang="ts" name="meetuDetail">
 import {
   Icon as vanIcon,
-  Empty as vanEmpty,
   Popover as vanPopover,
   Grid as vanGrid,
   GridItem as vanGridItem,
+  Skeleton as vanSkeleton,
   showToast,
 } from "vant";
 import { onBeforeMount, ref, defineProps } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import getPersonInfo from "@/api/user/getPersonInfo";
 import getProfile from "@/api/user/getProfile";
+import getUserPostList from "@/api/square/getUserPostList";
 import { useClipboard } from "@/components//hooks/useClipboard";
+import formatTimeStamp from "@/utils/formatTimeStamp";
 import isOwnFriend from "@/api/user/isOwnFriend";
 
 const props = defineProps<{
   uid: string;
 }>();
 
+const route = useRoute();
 const router = useRouter();
-const isEmpty = ref<boolean>(true);
+const isLoading = ref<boolean>(true);
 const headerImage = ref<string>(getProfile("header-background.jpeg"));
 const userProfile = ref<string>("");
 const gender = ref<string>("");
@@ -30,31 +33,64 @@ const username = ref<string>("");
 const sign = ref<string>("");
 const muid = ref<string>("");
 const isFriendDisable = ref<boolean>(false);
+const userCreateTime = ref<number>();
+const postList = ref<
+  {
+    art_id: number;
+    title: string;
+    content: string;
+    updated_time: string;
+  }[]
+>([]);
 
 onBeforeMount(async () => {
-  const { data: res1 } = await getPersonInfo(props.uid);
-  if (res1.code === 200) {
-    const data = res1.data;
-    userProfile.value = getProfile(data.profile);
-    username.value = data.username;
-    gender.value = data.gender;
-    sign.value = data.sign;
-    muid.value = data.muid;
+  const token = route.meta.token as string;
+  const uid = route.meta.uid;
+
+  const promiseArr = [
+    getPersonInfo(props.uid as string),
+    getUserPostList(props.uid as string),
+  ];
+  await Promise.all(promiseArr)
+    .then(async (res) => {
+      // 获取用户个人信息
+      if (res[0].data.code === 200) {
+        const data = res[0].data.data;
+        userProfile.value = getProfile(data.profile);
+        username.value = data.username;
+        gender.value = data.gender;
+        sign.value = data.sign;
+        muid.value = data.muid;
+        userCreateTime.value = data.created_time;
+      } else {
+        showToast({ message: "网络错误", position: "bottom" });
+      }
+      // 获取用户发布的所有帖子
+      if (res[1].data.code === 200) {
+        const data = res[1].data.data;
+        postList.value = data;
+        isLoading.value = false;
+      }
+    })
+    .catch(() => {
+      showToast({ message: "网络错误", position: "bottom" });
+    });
+
+  // 判断当前用户是否为好友
+  const res = await isOwnFriend(token, muid.value);
+  if (uid === props.uid || res.data.code === 200) {
+    isFriendDisable.value = false;
+  } else if (res.data.code === 404) {
+    isFriendDisable.value = true;
   } else {
-    showToast({ message: "未找到该用户", position: "bottom" });
-  }
-  const token = localStorage.getItem("meetu_jwt_token") as string;
-  const uid = localStorage.getItem("meetu_uid");
-  if (uid === props.uid) isFriendDisable.value = false;
-  else {
-    const { data: res2 } = await isOwnFriend(token, muid.value);
-    if (res2.code === 200) {
-      isFriendDisable.value = false;
-    } else if (res2.code === 404) {
-      isFriendDisable.value = true;
-    }
+    showToast({ message: res.data.msg, position: "bottom" });
   }
 });
+
+// 点击对应的帖子跳转到帖子详情页
+const postClick = (postId: number) => {
+  router.push({ name: "postDetail", params: { postId } });
+};
 
 // 点击返回按钮
 const goBack = () => {
@@ -136,12 +172,30 @@ useClipboard("#copyBtn", ".muid span", (status) => {
     <span id="sign">{{ sign }}</span>
   </div>
   <div class="content-box">
-    <van-empty
-      v-if="isEmpty"
-      style="padding-top: 20%"
-      image-size="10rem"
-      description="TA 还没有发布任何动态哦！"
-    />
+    <div v-if="isLoading" class="skeleton">
+      <van-skeleton title :row="3" />
+      <van-skeleton title :row="3" />
+    </div>
+    <div class="content" v-else>
+      <div
+        class="item"
+        v-for="post in postList"
+        :key="post.art_id"
+        @click="postClick(post.art_id)"
+      >
+        <h3 class="post-title van-ellipsis">{{ post.title }}</h3>
+        <p class="post-content van-multi-ellipsis--l2">{{ post.content }}</p>
+        <span class="post-time">{{
+          formatTimeStamp(post.updated_time, "auto")
+        }}</span>
+      </div>
+      <div class="birth-item">
+        <p>TA出生了！</p>
+        <span class="birth-time">{{
+          formatTimeStamp(Number(userCreateTime), "auto")
+        }}</span>
+      </div>
+    </div>
   </div>
   <div class="footer-fixed">
     <div class="add-friend" v-if="isFriendDisable" @click="goAddFriend">
@@ -226,15 +280,83 @@ useClipboard("#copyBtn", ".muid span", (status) => {
   }
 }
 .content-box {
-  z-index: 2;
+  z-index: 1;
   position: relative;
   top: -20px;
   width: 100%;
   min-height: calc(60% + 20px);
-  padding: 10px;
+  padding: 20px;
   box-sizing: border-box;
   background-color: white;
   border-radius: 20px 20px 0 0;
+  .skeleton {
+    margin: 0 auto;
+    width: 90%;
+    margin-top: 20px;
+    > div {
+      margin-bottom: 60px;
+    }
+  }
+  .content {
+    margin: 0 auto;
+    margin-bottom: 80px;
+    width: 95%;
+    padding: 20px 10px;
+    display: flex;
+    // justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    > div {
+      margin-bottom: 20px;
+    }
+    .item {
+      width: 85%;
+      min-height: 100px;
+      box-shadow: 2px 2px 10px 1px lightgray;
+      border-radius: 10px;
+      padding: 10px 10px 5px 10px;
+      position: relative;
+      z-index: 2;
+      margin-bottom: 60px;
+      .post-title {
+        margin: 0;
+        padding-left: 5px;
+      }
+      .post-content {
+        padding-left: 5px;
+      }
+      .post-time {
+        font-size: 15px;
+        color: rgb(167, 167, 167);
+      }
+    }
+    .item::after {
+      content: "";
+      display: inline-block;
+      width: 5px;
+      height: 60px;
+      box-shadow: 1px 1px 2px 2px #efefef;
+      background-color: lightblue;
+      z-index: 1;
+      position: absolute;
+      left: 40px;
+      bottom: 0;
+      transform: translateY(100%);
+    }
+
+    .birth-item {
+      width: 85%;
+      min-height: 60px;
+      box-shadow: 2px 2px 10px 1px lightgray;
+      border-radius: 10px;
+      padding: 10px 10px 5px 10px;
+      .birth-time {
+        font-size: 15px;
+        color: rgb(167, 167, 167);
+      }
+    }
+  }
 }
 .footer-fixed {
   z-index: 3;

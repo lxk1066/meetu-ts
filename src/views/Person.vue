@@ -3,40 +3,77 @@ export default { name: "meetuPerson" };
 </script>
 <script setup lang="ts" name="meetuPerson">
 import { ref, onBeforeMount } from "vue";
+import { useRouter } from "vue-router";
 import {
   Icon as vanIcon,
-  Empty as vanEmpty,
   Popover as vanPopover,
   Grid as vanGrid,
   GridItem as vanGridItem,
+  Skeleton as vanSkeleton,
   showToast,
 } from "vant";
 import getPersonInfo from "@/api/user/getPersonInfo";
 import getProfile from "@/api/user/getProfile";
+import getUserPostList from "@/api/square/getUserPostList";
 import { useClipboard } from "@/components/hooks/useClipboard";
+import formatTimeStamp from "@/utils/formatTimeStamp";
 
-const isEmpty = ref<boolean>(true);
+const router = useRouter();
+
+const isLoading = ref<boolean>(true);
 const headerImage = ref<string>(getProfile("header-background.jpeg"));
 const userProfile = ref<string>("");
 const gender = ref<string>("");
 const username = ref<string>("");
 const sign = ref<string>("");
 const muid = ref<string>("");
+const userCreateTime = ref<number>();
+const postList = ref<
+  {
+    art_id: number;
+    title: string;
+    content: string;
+    updated_time: string;
+  }[]
+>([]);
 
 onBeforeMount(async () => {
   const uid = localStorage.getItem("meetu_uid");
-  const { data: res } = await getPersonInfo(uid as string);
-  if (res.code === 200) {
-    const data = res.data;
-    userProfile.value = getProfile(data.profile);
-    username.value = data.username;
-    gender.value = data.gender;
-    sign.value = data.sign;
-    muid.value = data.muid;
-  } else {
-    showToast({ message: "网络错误", position: "bottom" });
-  }
+
+  const promiseArr = [
+    getPersonInfo(uid as string),
+    getUserPostList(uid as string),
+  ];
+  Promise.all(promiseArr)
+    .then((res) => {
+      // 获取用户个人信息
+      if (res[0].data.code === 200) {
+        const data = res[0].data.data;
+        userProfile.value = getProfile(data.profile);
+        username.value = data.username;
+        gender.value = data.gender;
+        sign.value = data.sign;
+        muid.value = data.muid;
+        userCreateTime.value = data.created_time;
+      } else {
+        showToast({ message: "未找到该用户", position: "bottom" });
+      }
+      // 获取用户发布的所有帖子
+      if (res[1].data.code === 200) {
+        const data = res[1].data.data;
+        postList.value = data;
+        isLoading.value = false;
+      }
+    })
+    .catch(() => {
+      showToast({ message: "网络错误", position: "bottom" });
+    });
 });
+
+// 点击对应的帖子跳转到帖子详情页
+const postClick = (postId: number) => {
+  router.push({ name: "postDetail", params: { postId } });
+};
 
 // 屏幕长按MUID弹出复制气泡框
 const muidRef = ref<HTMLElement | null>(null);
@@ -114,12 +151,30 @@ useClipboard("#copyBtn", ".muid span", (status) => {
     </span>
   </div>
   <div class="content-box">
-    <van-empty
-      v-if="isEmpty"
-      style="padding-top: 20%"
-      image-size="10rem"
-      description="你还没有发布任何动态哦！"
-    />
+    <div v-if="isLoading" class="skeleton">
+      <van-skeleton title :row="3" />
+      <van-skeleton title :row="3" />
+    </div>
+    <div class="content" v-else>
+      <div
+        class="item"
+        v-for="post in postList"
+        :key="post.art_id"
+        @click="postClick(post.art_id)"
+      >
+        <h3 class="post-title van-ellipsis">{{ post.title }}</h3>
+        <p class="post-content van-multi-ellipsis--l2">{{ post.content }}</p>
+        <span class="post-time">{{
+          formatTimeStamp(post.updated_time, "auto")
+        }}</span>
+      </div>
+      <div class="birth-item">
+        <p>您出生了！</p>
+        <span class="birth-time">{{
+          formatTimeStamp(Number(userCreateTime), "auto")
+        }}</span>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -221,14 +276,81 @@ useClipboard("#copyBtn", ".muid span", (status) => {
   }
 }
 .content-box {
-  z-index: 2;
+  z-index: 1;
   position: relative;
   top: -20px;
   width: 100%;
   min-height: calc(60% - 40px);
-  padding: 10px;
+  padding: 20px;
   box-sizing: border-box;
   background-color: white;
   border-radius: 20px 20px 0 0;
+  .skeleton {
+    margin: 0 auto;
+    width: 90%;
+    margin-top: 20px;
+    > div {
+      margin-bottom: 60px;
+    }
+  }
+  .content {
+    margin: 0 auto;
+    width: 95%;
+    padding: 20px 10px;
+    display: flex;
+    // justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    > div {
+      margin-bottom: 20px;
+    }
+    .item {
+      width: 85%;
+      min-height: 100px;
+      box-shadow: 2px 2px 10px 1px lightgray;
+      border-radius: 10px;
+      padding: 10px 10px 5px 10px;
+      position: relative;
+      z-index: 2;
+      margin-bottom: 60px;
+      .post-title {
+        margin: 0;
+        padding-left: 5px;
+      }
+      .post-content {
+        padding-left: 5px;
+      }
+      .post-time {
+        font-size: 15px;
+        color: rgb(167, 167, 167);
+      }
+    }
+    .item::after {
+      content: "";
+      display: inline-block;
+      width: 5px;
+      height: 60px;
+      box-shadow: 1px 1px 2px 2px #efefef;
+      background-color: lightblue;
+      z-index: 1;
+      position: absolute;
+      left: 40px;
+      bottom: 0;
+      transform: translateY(100%);
+    }
+
+    .birth-item {
+      width: 85%;
+      min-height: 60px;
+      box-shadow: 2px 2px 10px 1px lightgray;
+      border-radius: 10px;
+      padding: 10px 10px 5px 10px;
+      .birth-time {
+        font-size: 15px;
+        color: rgb(167, 167, 167);
+      }
+    }
+  }
 }
 </style>
