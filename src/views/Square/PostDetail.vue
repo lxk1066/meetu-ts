@@ -98,6 +98,19 @@ const picturePreview = () => {
   });
 };
 
+// 点击点赞按钮
+let dianzanTimer: number;
+const dianzanHandler = (e: Event) => {
+  (e.target as HTMLElement).classList.toggle("dianzan-active");
+  (e.target as HTMLElement).classList.add("dianzan-ani");
+
+  clearTimeout(dianzanTimer);
+  dianzanTimer = setTimeout(() => {
+    (e.target as HTMLElement).classList.remove("dianzan-ani");
+    clearTimeout(dianzanTimer);
+  }, 1000);
+};
+
 onBeforeUnmount(() => {
   if (pictureItems.length) {
     pictureItems.forEach((item) => {
@@ -179,9 +192,7 @@ onBeforeUnmount(() => {
         />
       </div>
       <div class="post-function">
-        <div class="dianzan">
-          <img src="@/assets/imgs/dianzan.svg" alt="" />
-        </div>
+        <div class="dianzan" @click="dianzanHandler"></div>
         <div class="pinglun">
           <img src="@/assets/imgs/pinglun.svg" alt="" />
         </div>
@@ -266,6 +277,21 @@ onBeforeUnmount(() => {
       justify-content: center;
       align-items: center;
     }
+
+    .dianzan {
+      background: url("../../assets/imgs/dianzan.svg");
+      background-position: right center;
+      background-size: 25px 25px;
+    }
+    .dianzan-active {
+      background: url("../../assets/imgs/dianzan-active.svg");
+      background-position: right center;
+      background-size: 25px 25px;
+    }
+  }
+  .dianzan-ani {
+    animation: bounceIn;
+    animation-duration: 1.5s;
   }
 }
 </style>

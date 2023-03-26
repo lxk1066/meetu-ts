@@ -11,5 +11,6 @@ import router from "./router";
 app.use(router);
 
 import "vant/lib/index.css";
+import "animate.css";
 
 app.mount("#app");
