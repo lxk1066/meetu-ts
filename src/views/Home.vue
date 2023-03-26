@@ -13,7 +13,11 @@ const unread = computed(() => store.unreadCount);
 </script>
 
 <template>
-  <router-view />
+  <router-view v-slot="{ Component }">
+    <keep-alive>
+      <component :is="Component"></component>
+    </keep-alive>
+  </router-view>
   <van-tabbar class="tab-bar" v-model="active" route placeholder>
     <van-tabbar-item
       class="tabbar-item"

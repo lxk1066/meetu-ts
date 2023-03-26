@@ -6,7 +6,11 @@ export default {
 <script setup lang="ts" name="meetuSquarePost">
 import { onBeforeUnmount, ref, defineProps } from "vue";
 import { useRouter } from "vue-router";
-import { Icon as vanIcon, Image as vanImage, showImagePreview } from "vant";
+import {
+  Icon as vanIcon,
+  Image as vanImage,
+  ImagePreview as vanImagePreview,
+} from "vant";
 import getProfile from "@/api/user/getProfile";
 import getPicture from "@/api/square/getPicture";
 import formatTimeStamp from "@/utils/formatTimeStamp";
@@ -30,6 +34,11 @@ const props = defineProps<{
 
 const router = useRouter();
 const picturesRef = ref<HTMLElement | null>(null);
+const isShowImagePreview = ref<boolean>(false);
+const imageIndex = ref<number>(0);
+const images = ref<string[]>(
+  props.pictures.map((item) => getPicture(item.pic_name))
+);
 let pictureItems: Element[] = [];
 const openDetail = () => {
   router.push({ name: "postDetail", params: { postId: props.postId } });
@@ -41,14 +50,13 @@ const pictureLoad = () => {
   loadedNumber = loadedNumber + 1;
   if (loadedNumber === props.pictures.length) {
     picturePreview();
+    // isShowImagePreview.value = true;
   }
 };
 const pictureItemFn = (e: Event) => {
   e.stopPropagation();
-  showImagePreview({
-    images: props.pictures.map((item) => getPicture(item.pic_name)),
-    startPosition: pictureItems.indexOf((e.target as any).parentNode),
-  });
+  imageIndex.value = pictureItems.indexOf((e.target as any).parentNode);
+  isShowImagePreview.value = true;
 };
 // 点击图片进入图片预览
 const picturePreview = () => {
@@ -109,6 +117,12 @@ onBeforeUnmount(() => {
           :style="{ marginTop: '10px', marginRight: '5px' }"
         />
       </div>
+      <!-- 点击图片预览图片 -->
+      <van-image-preview
+        v-model:show="isShowImagePreview"
+        :start-position="imageIndex"
+        :images="images"
+      ></van-image-preview>
     </div>
     <div class="article-function">
       <div class="dianzan">

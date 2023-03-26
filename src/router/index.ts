@@ -145,6 +145,21 @@ const routes: RouteRecordRaw[] = [
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: routes,
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition;
+    } else if (to.name === "square") {
+      return {
+        top: Number(localStorage.getItem("SquareScrollTop") ?? 0),
+        left: 0,
+      };
+    } else {
+      return {
+        top: 0,
+        left: 0,
+      };
+    }
+  },
 });
 
 router.beforeEach(async (to, from, next) => {

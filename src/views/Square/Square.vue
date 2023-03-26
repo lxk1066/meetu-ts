@@ -1,8 +1,8 @@
 <script lang="ts">
 export default { name: "meetuSquare" };
 </script>
-<script setup lang="ts" name="meetuSquare">
-import { onMounted, ref } from "vue";
+<script setup lang="ts">
+import { onMounted, ref, onActivated, onDeactivated, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import {
   Icon as vanIcon,
@@ -29,23 +29,29 @@ const actions = [
   { text: "拍照", icon: "photograph" },
 ];
 
+// 整个广场的HTML元素
+const squareEl = ref<HTMLElement | null>(null);
+
 onMounted(async () => {
-  loading.value = true;
-  postList.value = [];
-  const { data: res } = await getPostList("time", 0, 10);
-  if (res.code === 200) {
-    postList.value = res.data.result;
-    loading.value = false;
-    loadUserInfo().catch(() => {
-      showFailToast({
-        message: "部分用户信息获取失败",
-        position: "bottom",
+  if (postList.value.length <= 0) {
+    loading.value = true;
+    postList.value = [];
+    const { data: res } = await getPostList("time", 0, 10);
+    if (res.code === 200) {
+      postList.value = res.data.result;
+      loading.value = false;
+      loadUserInfo().catch(() => {
+        showFailToast({
+          message: "部分用户信息获取失败",
+          position: "bottom",
+        });
       });
-    });
+    }
   }
 });
 
 const loadUserInfo = async () => {
+  window.scroll({ top: 0 });
   for (const item of postList.value) {
     const { data: res } = await getMuidUserInfo(item.muid);
     if (res.code === 200) {
@@ -95,6 +101,25 @@ const onLoad = async () => {
     showFailToast({ message: "获取失败", position: "bottom" });
   }
 };
+
+// 记录广场的浏览位置，下次进来自动跳到上一次离开时的位置
+const scrollTopHandler = () => {
+  if (window.scrollY % 2 === 0) {
+    localStorage.setItem("SquareScrollTop", String(window.scrollY));
+  }
+};
+
+onActivated(() => {
+  window.addEventListener("scroll", scrollTopHandler);
+});
+
+onDeactivated(() => {
+  window.removeEventListener("scroll", scrollTopHandler);
+});
+
+onUnmounted(() => {
+  localStorage.removeItem("SquareScrollTop");
+});
 </script>
 
 <template>
@@ -153,7 +178,7 @@ const onLoad = async () => {
             />
           </van-list>
         </van-pull-refresh>
-        <van-back-top bottom="10vh" />
+        <van-back-top bottom="15vh" :teleport="squareEl" />
       </div>
     </div>
   </div>

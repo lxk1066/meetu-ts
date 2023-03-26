@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, provide } from "vue";
+import { onBeforeUnmount, provide, ref } from "vue";
 import { useStore } from "@/stores";
 import socket from "@/utils/socket/socket";
 import Login from "@/components/Login.vue";
@@ -7,6 +7,16 @@ import verifyToken from "./api/user/verifyToken";
 
 provide("socket", socket);
 const store = useStore();
+
+// 记录不需要被Keepalive缓存的组件名
+const noCatchList = ref<string[]>([
+  "meetuSquarePostDetail",
+  "meetuNotices",
+  "meetuEditUserInfo",
+  "meetuSettings",
+  "meetuDetail",
+  "meetuPublishPost",
+]);
 
 init();
 
@@ -45,8 +55,11 @@ async function init() {
 </script>
 
 <template>
-  <!-- <h1>he</h1> -->
-  <router-view />
+  <router-view v-slot="{ Component }">
+    <keep-alive :exclude="noCatchList">
+      <component :is="Component"></component>
+    </keep-alive>
+  </router-view>
   <Login v-if="$route.meta.auth" />
 </template>
 
@@ -57,8 +70,7 @@ html,
   width: 100%;
   height: 100%;
 
-  font-family: "Noto Sans", "Open Sans", "Noto Sans SC", "Roboto Light",
-    sans-serif;
+  font-family: "Noto Sans", "Roboto Light", sans-serif;
 }
 
 @font-face {
@@ -68,18 +80,18 @@ html,
   font-display: swap;
   src: url("@/assets/fonts/NotoSans-Medium.ttf");
 }
-@font-face {
-  font-family: "Open Sans";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("@/assets/fonts/OpenSans-Medium.ttf");
-}
-@font-face {
-  font-family: "Noto Sans SC";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("@/assets/fonts/NotoSansSC-Medium.otf");
-}
+// @font-face {
+//   font-family: "Open Sans";
+//   font-style: normal;
+//   font-weight: 400;
+//   font-display: swap;
+//   src: url("@/assets/fonts/OpenSans-Medium.ttf");
+// }
+// @font-face {
+//   font-family: "Noto Sans SC";
+//   font-style: normal;
+//   font-weight: 400;
+//   font-display: swap;
+//   src: url("@/assets/fonts/NotoSansSC-Medium.otf");
+// }
 </style>

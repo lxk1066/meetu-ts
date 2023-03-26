@@ -6,7 +6,8 @@ import {
   Image as vanImage,
   Icon as vanIcon,
   showFailToast,
-  showImagePreview,
+  ImagePreview as vanImagePreview,
+  ActionSheet as vanActionSheet,
 } from "vant";
 import getPost from "@/api/square/getPost";
 import getProfile from "@/api/user/getProfile";
@@ -22,6 +23,9 @@ const props = defineProps<{
 const router = useRouter();
 const postData = ref<Post | null>(null);
 const picturesRef = ref<HTMLImageElement | null>(null);
+const isShowImagePreview = ref<boolean>(false);
+const imageIndex = ref<number>(0);
+const images = ref<string[]>([]);
 let pictureItems: Element[] = [];
 
 const onClickLeft = () => {
@@ -49,19 +53,27 @@ const pictureLoad = () => {
   loadedNumber = loadedNumber + 1;
   if (loadedNumber === (postData.value as Post).pictures.length) {
     picturePreview();
+    images.value = (postData.value as Post).pictures.map((item) =>
+      getPicture(item.pic_name)
+    );
   }
 };
 
 const pictureItemFn = (e: Event) => {
-  showImagePreview({
-    images: (postData.value as Post).pictures.map((item) =>
-      getPicture(item.pic_name)
-    ),
-    startPosition: pictureItems.indexOf((e.target as any).parentNode),
-  });
+  imageIndex.value = pictureItems.indexOf((e.target as any).parentNode);
+  isShowImagePreview.value = true;
 };
 
+// 长按图片弹出保存
+const isShowCopyImage = ref<boolean>(false);
+const copyImage = (e: { index: number }) => {
+  console.log(e.index);
+  isShowCopyImage.value = true;
+};
+const copyImageActions = [{ name: "保存图片到手机" }];
+
 onBeforeMount(async () => {
+  window.scroll({ top: 0 });
   const { data: res } = await getPost(props.postId);
   if (res.code === 200) {
     postData.value = res.data.result;
@@ -151,6 +163,20 @@ onBeforeUnmount(() => {
             :style="{ marginTop: '10px', marginRight: '5px' }"
           />
         </div>
+        <!-- 点击图片预览图片 -->
+        <van-image-preview
+          v-model:show="isShowImagePreview"
+          :start-position="imageIndex"
+          :images="images"
+          @long-press="copyImage"
+        ></van-image-preview>
+        <!-- 显示保存图片的动作栏 -->
+        <van-action-sheet
+          v-model:show="isShowCopyImage"
+          :actions="copyImageActions"
+          cancel-text="取消"
+          close-on-click-action
+        />
       </div>
       <div class="post-function">
         <div class="dianzan">
