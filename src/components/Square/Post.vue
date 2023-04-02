@@ -4,7 +4,7 @@ export default {
 };
 </script>
 <script setup lang="ts" name="meetuSquarePost">
-import { onBeforeUnmount, ref, defineProps } from "vue";
+import { onActivated, onBeforeUnmount, ref, defineProps } from "vue";
 import { useRouter } from "vue-router";
 import {
   Icon as vanIcon,
@@ -14,6 +14,7 @@ import {
 import getProfile from "@/api/user/getProfile";
 import getPicture from "@/api/square/getPicture";
 import formatTimeStamp from "@/utils/formatTimeStamp";
+import { usePostStar } from "@/components/hooks/usePostStar";
 
 interface PictureItem {
   pic_id: string | number;
@@ -69,17 +70,24 @@ const picturePreview = () => {
 };
 
 // 点击点赞按钮
-let dianzanTimer: number;
-const dianzanHandler = (e: Event) => {
-  (e.target as HTMLElement).classList.toggle("dianzan-active");
-  (e.target as HTMLElement).classList.add("dianzan-ani");
+const starStatus = ref<boolean>(false); // 记录当前帖子的点赞状态
 
-  clearTimeout(dianzanTimer);
-  dianzanTimer = setTimeout(() => {
-    (e.target as HTMLElement).classList.remove("dianzan-ani");
-    clearTimeout(dianzanTimer);
-  }, 1000);
-};
+const { dianzanHandler, getPostStarStatus, uid } = usePostStar(
+  starStatus,
+  props.postId
+);
+
+onActivated(async () => {
+  if (uid == 0) return;
+
+  const res = await getPostStarStatus(props.postId, uid);
+
+  if (res) {
+    starStatus.value = true;
+  } else {
+    starStatus.value = false;
+  }
+});
 
 onBeforeUnmount(() => {
   if (pictureItems.length) {
@@ -138,7 +146,11 @@ onBeforeUnmount(() => {
       ></van-image-preview>
     </div>
     <div class="article-function">
-      <div class="dianzan" @click="dianzanHandler"></div>
+      <div
+        class="dianzan"
+        :class="{ 'dianzan-active': starStatus, 'dianzan-ani': starStatus }"
+        @click="dianzanHandler"
+      ></div>
       <div class="pinglun">
         <img src="@/assets/imgs/pinglun.svg" alt="" />
       </div>
@@ -240,6 +252,6 @@ onBeforeUnmount(() => {
 
 .dianzan-ani {
   animation: bounceIn;
-  animation-duration: 1.5s;
+  animation-duration: 1s;
 }
 </style>

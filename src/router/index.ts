@@ -165,7 +165,13 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const token = localStorage.getItem("meetu_jwt_token");
   const uid = localStorage.getItem("meetu_uid");
-  const noAuthArr = ["/register", "/login", "/changePassword/", "/square"]; // 不需要登录授权的路由数组
+  const noAuthArr = [
+    "/register",
+    "/login",
+    "/changePassword/",
+    "/square",
+    "/square/postDetail/",
+  ]; // 不需要登录授权的路由数组
   const authArr = ["/square/pubPost"]; // 需要登录授权的路由数组(不含全部)
   if (
     authArr.some((item) => to.path.startsWith(item)) ||

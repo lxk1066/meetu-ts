@@ -14,6 +14,7 @@ import getProfile from "@/api/user/getProfile";
 import formatTimeStamp from "@/utils/formatTimeStamp";
 import getMuidUserInfo from "@/api/user/getMuidUserInfo";
 import getPicture from "@/api/square/getPicture";
+import { usePostStar } from "@/components/hooks/usePostStar";
 import type { Post } from "@/types";
 
 const props = defineProps<{
@@ -99,17 +100,9 @@ const picturePreview = () => {
 };
 
 // 点击点赞按钮
-let dianzanTimer: number;
-const dianzanHandler = (e: Event) => {
-  (e.target as HTMLElement).classList.toggle("dianzan-active");
-  (e.target as HTMLElement).classList.add("dianzan-ani");
+const starStatus = ref<boolean>(false); // 记录当前帖子的点赞状态
 
-  clearTimeout(dianzanTimer);
-  dianzanTimer = setTimeout(() => {
-    (e.target as HTMLElement).classList.remove("dianzan-ani");
-    clearTimeout(dianzanTimer);
-  }, 1000);
-};
+const { dianzanHandler } = usePostStar(starStatus, props.postId);
 
 onBeforeUnmount(() => {
   if (pictureItems.length) {
@@ -192,7 +185,11 @@ onBeforeUnmount(() => {
         />
       </div>
       <div class="post-function">
-        <div class="dianzan" @click="dianzanHandler"></div>
+        <div
+          class="dianzan"
+          :class="{ 'dianzan-active': starStatus, 'dianzan-ani': starStatus }"
+          @click="dianzanHandler"
+        ></div>
         <div class="pinglun">
           <img src="@/assets/imgs/pinglun.svg" alt="" />
         </div>
