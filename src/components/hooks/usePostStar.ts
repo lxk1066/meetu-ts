@@ -2,6 +2,7 @@ import { onMounted, type Ref } from "vue";
 import { showFailToast } from "vant";
 import starPost from "@/api/square/starPost";
 import postStarStatus from "@/api/square/postStarStatus";
+import { throttle } from "@/utils/throttle";
 
 // 点击点赞按钮
 const token = localStorage.getItem("meetu_jwt_token") as string;
@@ -11,21 +12,30 @@ export const usePostStar = (
   starStatus: Ref<boolean>,
   postId: string | number
 ) => {
-  const dianzanHandler = () => {
-    starStatus.value = !starStatus.value;
-
-    // 发起点赞请求
-    starPostFn();
-  };
-
   // 发起点赞请求
   const starPostFn = async (): Promise<void> => {
+    if (count % 2 === 0) return;
+    count = 0;
+
     if (!token) {
       showFailToast({ message: "未登录", position: "bottom" });
     } else {
       const { data: res } = await starPost(postId, token);
       console.log("starPost res:", res);
     }
+  };
+
+  // 记录点赞的次数以计算是奇数还是偶数，只有奇数次才会发起请求，偶数次相当于抵消了
+  let count: number = 0;
+  // 使用节流函数
+  const fn = throttle(starPostFn, 1000);
+
+  const dianzanHandler = () => {
+    starStatus.value = !starStatus.value;
+    count++;
+
+    // 发起点赞请求
+    fn();
   };
 
   // 获取帖子的点赞状态
