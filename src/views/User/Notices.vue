@@ -43,6 +43,7 @@ onBeforeMount(async () => {
         profile: info.profile,
         message: item.message,
         type: item.type,
+        data: item?.data ?? {},
         time: item.time,
       });
     }
@@ -151,9 +152,21 @@ const delNotice = async (index: number) => {
                 {{ item.username }}
               </span>
               <span v-if="item.type === 'addFriend'">申请加你为好友</span>
-              <span v-else-if="item.type === 'disagreeFriend'"
-                >拒绝了你的好友请求</span
-              >
+              <span v-else-if="item.type === 'disagreeFriend'">
+                拒绝了你的好友请求
+              </span>
+              <span v-else-if="item.type === 'starPost'">
+                赞了你的
+                <router-link
+                  class="post-link"
+                  :to="{
+                    name: 'postDetail',
+                    params: { postId: item?.data?.postId },
+                  }"
+                >
+                  帖子
+                </router-link>
+              </span>
             </span>
             <span class="message van-ellipsis">{{ item.message }}</span>
           </p>
@@ -193,7 +206,8 @@ const delNotice = async (index: number) => {
     margin: 0;
     padding: 5px 10px;
     font-size: 15px;
-    .username {
+    .username,
+    .post-link {
       color: #cd93ff;
     }
     .message {

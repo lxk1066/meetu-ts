@@ -12,6 +12,7 @@ export declare interface Notice {
   from: string;
   to: string;
   message: string;
+  data?: { postId?: string | number };
   time: number;
 }
 

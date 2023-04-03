@@ -1,5 +1,6 @@
 <script setup lang="ts" name="meetuAddressBook">
-import { ref, onBeforeMount } from "vue";
+import { ref, onBeforeMount, onActivated } from "vue";
+import { useRoute } from "vue-router";
 import {
   Badge as vanBadge,
   NavBar as vanNavBar,
@@ -26,11 +27,20 @@ interface friend {
 }
 type indexedFriendsType = { [prop: string]: friend[] };
 
+const route = useRoute();
 const allFriends = ref<friend[]>([]);
 const indexAlphabet = ref<string[]>([]);
 const indexedFriends = ref<indexedFriendsType>({});
 const allNoticesNumber = ref(0);
 const showSearchFriendPopup = ref(false);
+
+onActivated(async () => {
+  const token = route.meta.token as string;
+  const { data: res2 } = await getAllNoticesNumber(token);
+  if (res2.code === 200) {
+    allNoticesNumber.value = res2.data.number;
+  }
+});
 
 onBeforeMount(async () => {
   const token = localStorage.getItem("meetu_jwt_token");
@@ -46,10 +56,6 @@ onBeforeMount(async () => {
           profile: result.data.profile,
         });
       }
-    }
-    const { data: res2 } = await getAllNoticesNumber(token as string);
-    if (res2.code === 200) {
-      allNoticesNumber.value = res2.data.number;
     }
   } else {
     showFailToast("网络错误");

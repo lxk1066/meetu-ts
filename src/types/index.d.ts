@@ -17,6 +17,7 @@ export declare interface NoticeInfo extends BaseInfo {
   uid: string;
   message: string;
   type: string;
+  data?: { postId?: string | number };
   time: number;
 }
 
