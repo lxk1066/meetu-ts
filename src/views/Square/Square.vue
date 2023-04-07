@@ -173,6 +173,7 @@ onUnmounted(() => {
               :profile="String(item.profile)"
               :title="item.title"
               :content="item.content"
+              :star="item.star"
               :pictures="item.pictures"
               :updated-time="item.updated_time"
             />

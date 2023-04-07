@@ -31,6 +31,7 @@ export declare interface Post {
   art_id: number;
   title: string;
   content: string;
+  star: string;
   muid: string;
   uid?: number | string;
   username?: string;
@@ -51,4 +52,20 @@ export declare interface Info {
   id?: string;
   username?: string;
   profile?: string;
+}
+
+export declare interface Comment {
+  id: number;
+  content: string;
+  rootCommentId: number | string;
+  toCommentId: number | string;
+  art_id: number | string;
+  user_id: number | string;
+  username: string;
+  created_time: number | string;
+  profile?: string;
+}
+
+export declare interface NewComment extends Comment {
+  subComments?: Comment[];
 }

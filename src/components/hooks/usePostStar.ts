@@ -1,5 +1,5 @@
 import { onMounted, type Ref } from "vue";
-import { showFailToast } from "vant";
+import { showToast } from "vant";
 import starPost from "@/api/square/starPost";
 import postStarStatus from "@/api/square/postStarStatus";
 import { throttle } from "@/utils/throttle";
@@ -18,10 +18,10 @@ export const usePostStar = (
     count = 0;
 
     if (!token) {
-      showFailToast({ message: "未登录", position: "bottom" });
+      showToast({ message: "未登录", position: "bottom" });
     } else {
       const { data: res } = await starPost(postId, token);
-      console.log("starPost res:", res);
+      if (res.code !== 200) showToast({ message: res.msg, position: "bottom" });
     }
   };
 

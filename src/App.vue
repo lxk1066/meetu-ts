@@ -10,6 +10,7 @@ const store = useStore();
 
 // 记录不需要被Keepalive缓存的组件名
 const noCatchList = ref<string[]>([
+  "meetuChatWindow",
   "meetuSquarePostDetail",
   "meetuNotices",
   "meetuEditUserInfo",

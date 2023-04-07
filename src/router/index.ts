@@ -165,6 +165,12 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const token = localStorage.getItem("meetu_jwt_token");
   const uid = localStorage.getItem("meetu_uid");
+  const loginStatus = await checkLogin(token, uid);
+  if (loginStatus) {
+    to.meta.token = token;
+    to.meta.uid = uid;
+  }
+
   const noAuthArr = [
     "/register",
     "/login",
@@ -178,9 +184,7 @@ router.beforeEach(async (to, from, next) => {
     !noAuthArr.some((item) => to.path.startsWith(item))
   ) {
     to.meta.auth = true;
-    if (await checkLogin(token, uid)) {
-      to.meta.token = token;
-      to.meta.uid = uid;
+    if (loginStatus) {
       next();
     } else {
       next("/login");

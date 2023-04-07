@@ -29,6 +29,7 @@ const props = defineProps<{
   profile: string;
   title: string;
   content: string;
+  star: number | string;
   pictures: PictureItem[];
   updatedTime: string | number;
 }>();
@@ -146,16 +147,21 @@ onBeforeUnmount(() => {
       ></van-image-preview>
     </div>
     <div class="article-function">
-      <div
-        class="dianzan"
-        :class="{ 'dianzan-active': starStatus, 'dianzan-ani': starStatus }"
-        @click="dianzanHandler"
-      ></div>
-      <div class="pinglun">
-        <img src="@/assets/imgs/pinglun.svg" alt="" />
+      <div class="dianzan-box">
+        <div
+          class="dianzan"
+          :class="{ 'dianzan-active': starStatus, 'dianzan-ani': starStatus }"
+          @click="dianzanHandler"
+        ></div>
+        <span>{{ Number(star) === 0 ? "" : star }}</span>
       </div>
-      <div class="zhuanfa">
-        <img src="@/assets/imgs/zhuanfa.svg" alt="" />
+      <div class="pinglun-box">
+        <div class="pinglun"></div>
+        <span></span>
+      </div>
+      <div class="zhuanfa-box">
+        <div class="zhuanfa"></div>
+        <span></span>
       </div>
     </div>
   </div>
@@ -237,13 +243,35 @@ onBeforeUnmount(() => {
       justify-content: center;
       align-items: center;
     }
+    .dianzan-box,
+    .pinglun-box,
+    .zhuanfa-box {
+      display: flex;
+      span {
+        font-size: 13px;
+        color: gray;
+        display: inline-flex;
+        align-items: center;
+        transform: translateX(-10px);
+      }
+    }
+    .pinglun {
+      background: url("@/assets/imgs/pinglun.svg");
+      background-position: right center;
+      background-size: 25px 25px;
+    }
+    .zhuanfa {
+      background: url("@/assets/imgs/zhuanfa.svg");
+      background-position: right center;
+      background-size: 25px 25px;
+    }
     .dianzan {
-      background: url("../../assets/imgs/dianzan.svg");
+      background: url("@/assets/imgs/dianzan.svg");
       background-position: right center;
       background-size: 25px 25px;
     }
     .dianzan-active {
-      background: url("../../assets/imgs/dianzan-active.svg");
+      background: url("@/assets/imgs/dianzan-active.svg");
       background-position: right center;
       background-size: 25px 25px;
     }
