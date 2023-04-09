@@ -57,8 +57,8 @@ export declare interface Info {
 export declare interface Comment {
   id: number;
   content: string;
-  rootCommentId: number | string;
-  toCommentId: number | string;
+  rootCommentId: number | string | null;
+  toCommentId: number | string | null;
   art_id: number | string;
   user_id: number | string;
   username: string;
@@ -69,3 +69,5 @@ export declare interface Comment {
 export declare interface NewComment extends Comment {
   subComments?: Comment[];
 }
+
+export declare type CommentType = "addRoot" | "replyRoot" | "replySub";

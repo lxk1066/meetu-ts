@@ -3,7 +3,7 @@ export default { name: "meetuLoginView" };
 </script>
 <script setup lang="ts" name="meetuLoginView">
 import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import {
   Button as vanButton,
   Icon as vanIcon,
@@ -14,10 +14,13 @@ import {
 } from "vant";
 import login from "@/api/user/login";
 
+const route = useRoute();
 const router = useRouter();
 const username = ref<string>("");
 const password = ref<string>("");
 const loginLoading = ref<boolean>(false);
+
+const redirect: string | null = (route.query?.redirect as string) ?? null;
 
 const onLogin = async () => {
   loginLoading.value = true;
@@ -26,7 +29,9 @@ const onLogin = async () => {
     loginLoading.value = false;
     localStorage.setItem("meetu_jwt_token", res.token);
     localStorage.setItem("meetu_uid", res.uid);
-    router.push("/");
+
+    if (redirect) router.replace(redirect);
+    else router.push("/");
   } else {
     loginLoading.value = false;
     showToast({

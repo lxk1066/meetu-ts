@@ -4,8 +4,8 @@ export default {
 };
 </script>
 <script setup lang="ts">
-import { ref, onMounted, defineProps } from "vue";
-import { showToast } from "vant";
+import { ref, watch, onMounted, defineProps } from "vue";
+import { Loading as vanLoading, showToast } from "vant";
 import { useRoute } from "vue-router";
 import { useStore } from "@/stores";
 import getPostComment from "@/api/square/getPostComment";
@@ -16,13 +16,15 @@ import getPersonInfo from "@/api/user/getPersonInfo";
 import CommentItem from "@/components/Square/Comment.vue";
 import CommentInput from "@/components/Square/CommentInput.vue";
 
-import type { Comment, NewComment } from "@/types/index";
+import type { Comment, NewComment, CommentType } from "@/types/index";
 
 const store = useStore();
 const route = useRoute();
 
 const commentList = ref<Comment[] | null>(null);
 const rootComments = ref<NewComment[]>([]);
+
+const loading = ref<boolean>(true); // 评论区数据加载
 
 const props = defineProps<{
   postId: number | string;
@@ -54,7 +56,7 @@ const loadAvatarList = async () => {
   }
 };
 
-// 将根评论和子评论分组到一起
+// 将根评论和子评论进行分组
 const groupCommentList = () => {
   const rootComments: NewComment[] = (commentList.value as Comment[]).filter(
     (comment) => comment.rootCommentId == null
@@ -97,7 +99,11 @@ onMounted(async () => {
     await loadAvatarList();
     // 将根评论和子评论筛到一起
     rootComments.value = groupCommentList();
+
+    // 如果获取成功，需等到数据分组成功后再停止loading
+    loading.value = false;
   } else {
+    loading.value = false; // 如果获取失败，直接停止loading
     showToast({ message: result.msg, position: "bottom" });
   }
 });
@@ -109,13 +115,97 @@ const commentBoxRef = ref<HTMLElement | null>(null);
 
 // 是否展示commentInput
 const isShowCommentInput = ref<boolean>(false);
+
+//  评论类型  根评论: addRoot 回复根评论: replyRoot 回复子评论: replySub
+const commentType = ref<CommentType>("addRoot");
+const replyUsername = ref<string>(""); // 回复评论的用户名
+const rootCommentId = ref<NewComment["rootCommentId"]>(null); // 回复的根评论ID，默认null
+const toCommentId = ref<NewComment["toCommentId"]>(null); // 回复的子评论ID，默认null
+
+// 当CommentInput隐藏后，重置commentType、replyUsername、rootCommentId和toCommentId
+watch(isShowCommentInput, (newVal) => {
+  if (newVal === false) {
+    commentPostHandle();
+  }
+});
+
+// 用户点击了父组件的评论按钮，重置 commentType 和 replyUsername
+const commentPostHandle = () => {
+  commentType.value = "addRoot";
+  replyUsername.value = "";
+  rootCommentId.value = null;
+  toCommentId.value = null;
+};
+
+// 点击回复评论按钮的自定义事件回调
+const replyCommentHandle = ({
+  type,
+  rootCommentId: replyRootCommentId,
+  commentUsername: replyCommentUsername,
+  subCommentId: replySubCommentId,
+}: {
+  type: CommentType;
+  rootCommentId: NewComment["id"];
+  commentUsername: NewComment["username"];
+  subCommentId?: NewComment["toCommentId"];
+}) => {
+  commentType.value = type;
+
+  // 回复根评论
+  if (type === "replyRoot") {
+    rootCommentId.value = replyRootCommentId;
+    replyUsername.value = replyCommentUsername;
+    toCommentId.value = null;
+  }
+
+  // 回复子评论
+  if (type === "replySub") {
+    replyUsername.value = replyCommentUsername;
+    rootCommentId.value = replyRootCommentId;
+    toCommentId.value = replySubCommentId as number;
+  }
+};
+
+// 点击发送评论按钮的自定义事件回调
+const addCommentHandle = ({
+  type,
+  comment,
+}: {
+  type: CommentType;
+  comment: NewComment;
+}) => {
+  // 总评论数＋1
+  commentCount.value++;
+  // 评论输入框重置
+  commentPostHandle();
+
+  // 将服务端返回的comment push到rootComments
+  if (type == "addRoot") {
+    // 添加根评论
+    rootComments.value.unshift(comment);
+  } else if (type == "replyRoot" || type == "replySub") {
+    // 回复根评论, 找到根评论的索引
+    const index = rootComments.value.findIndex(
+      (item) => item.id === comment.rootCommentId
+    );
+
+    if (index == -1) return;
+
+    if (!rootComments.value[index].subComments)
+      rootComments.value[index].subComments = [];
+
+    (rootComments.value[index].subComments as Comment[]).push(comment);
+  } else {
+    // 错误的类型type
+  }
+};
 </script>
 
 <template>
   <div class="comment-box" ref="commentBoxRef">
     <div class="header">
       <div class="left">
-        <h3>评论</h3>
+        <h3 @click="commentPostHandle">评论</h3>
         <span class="comment-count">{{ commentCount }}</span>
       </div>
       <div class="right">
@@ -126,13 +216,18 @@ const isShowCommentInput = ref<boolean>(false);
     </div>
     <!-- 评论内容区 -->
     <div class="comment">
+      <van-loading class="loading" v-if="loading" color="#1989fa" size="30">
+        加载中...
+      </van-loading>
+
       <comment-item
         v-for="comment in rootComments"
         :key="comment.id"
         :comment="comment"
+        @reply-comment="replyCommentHandle"
       ></comment-item>
 
-      <div class="empty" v-if="!commentCount">
+      <div class="empty" v-if="!loading && !commentCount">
         <span>快来发表你的评论吧</span>
       </div>
     </div>
@@ -141,7 +236,13 @@ const isShowCommentInput = ref<boolean>(false);
       <comment-input
         v-show="isShowCommentInput"
         :target-ref="commentBoxRef"
+        :post-id="props.postId"
+        :comment-type="commentType"
+        :username="replyUsername"
+        :root-comment-id="rootCommentId"
+        :to-comment-id="toCommentId"
         @show="isShowCommentInput = $event"
+        @add-comment="addCommentHandle"
       ></comment-input>
     </transition>
   </div>
@@ -189,6 +290,9 @@ const isShowCommentInput = ref<boolean>(false);
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    .loading {
+      margin-bottom: 10px;
+    }
     .empty {
       display: inline-block;
       color: grey;

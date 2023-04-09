@@ -33,6 +33,13 @@ let pictureItems: Element[] = [];
 const onClickLeft = () => {
   router.back();
 };
+const avatarClick = () => {
+  router.push({
+    name: "detail",
+    params: { uid: (postData.value as Post).uid },
+  });
+};
+
 const loadUserInfo = async () => {
   if (postData.value) {
     // 类型守卫 => 类型缩小
@@ -112,6 +119,9 @@ onBeforeUnmount(() => {
     });
   }
 });
+
+// 点击评论按钮
+const commentPost = () => {};
 </script>
 
 <template>
@@ -131,12 +141,7 @@ onBeforeUnmount(() => {
             width="3rem"
             height="3rem"
             fit="cover"
-            @click="
-              $router.push({
-                name: 'detail',
-                params: { uid: (postData as Post).uid },
-              })
-            "
+            @click="avatarClick"
             :src="getProfile(postData?.profile ?? 'default.png')"
             :style="{ display: 'inline-block' }"
           />
@@ -196,7 +201,7 @@ onBeforeUnmount(() => {
             postData ? (Number(postData.star) === 0 ? "" : postData.star) : ""
           }}</span>
         </div>
-        <div class="pinglun-box">
+        <div class="pinglun-box" @click="commentPost">
           <div class="pinglun"></div>
           <span></span>
         </div>

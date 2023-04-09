@@ -2,15 +2,50 @@
 export default { name: "meetuSquarePostCommentItem" };
 </script>
 <script setup lang="ts">
-import { defineProps } from "vue";
+import { defineProps, defineEmits } from "vue";
 import { Image as vanImage } from "vant";
 import getProfile from "@/api/user/getProfile";
 import formatTimeStamp from "@/utils/formatTimeStamp";
-import type { NewComment } from "@/types/index";
+import type { NewComment, CommentType } from "@/types/index";
 
 const props = defineProps<{
   comment: NewComment;
 }>();
+
+const emits = defineEmits<{
+  (
+    event: "replyComment",
+    data: {
+      type: CommentType;
+      rootCommentId: NewComment["id"];
+      commentUsername: NewComment["username"];
+      subCommentId?: NewComment["toCommentId"];
+    }
+  ): void;
+}>();
+
+// 回复根评论
+const replyRoot = (id: NewComment["id"], username: NewComment["username"]) => {
+  emits("replyComment", {
+    type: "replyRoot",
+    rootCommentId: id,
+    commentUsername: username,
+  });
+};
+
+// 回复子评论
+const replySub = (
+  rootCommentId: NewComment["id"],
+  subCommentId: NewComment["toCommentId"],
+  username: NewComment["username"]
+) => {
+  emits("replyComment", {
+    type: "replySub",
+    rootCommentId: rootCommentId,
+    commentUsername: username,
+    subCommentId: subCommentId,
+  });
+};
 </script>
 
 <template>
@@ -32,7 +67,9 @@ const props = defineProps<{
         </div>
       </div>
       <div class="header-right">
-        <span>回复</span>
+        <span @click="replyRoot(props.comment.id, props.comment.username)">
+          回复
+        </span>
       </div>
     </div>
     <p class="comment-item-content">
@@ -62,10 +99,25 @@ const props = defineProps<{
             </div>
           </div>
           <div class="header-right">
-            <span>回复</span>
+            <span
+              @click="
+                replySub(props.comment.id, subComment.id, subComment.username)
+              "
+            >
+              回复
+            </span>
           </div>
         </div>
         <p class="comment-item-content sub-comment-item-content">
+          <!-- 回复子评论的用户名 -->
+          <span v-if="subComment.toCommentId" class="to-sub-comment-username">
+            {{
+              "@" +
+              props.comment.subComments.find(
+                (item) => item.id === subComment.toCommentId
+              )?.username
+            }}
+          </span>
           {{ subComment.content }}
         </p>
       </div>
@@ -140,6 +192,9 @@ const props = defineProps<{
   word-break: break-word;
   white-space: pre-wrap;
   padding-bottom: 5px;
+  .to-sub-comment-username {
+    color: #0099d6;
+  }
 }
 .sub-comment {
   display: flex;

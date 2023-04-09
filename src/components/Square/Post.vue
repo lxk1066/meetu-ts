@@ -78,6 +78,14 @@ const { dianzanHandler, getPostStarStatus, uid } = usePostStar(
   props.postId
 );
 
+// 点击评论按钮
+const commentPost = () => {
+  router.push({
+    name: "postDetail",
+    params: { postId: props.postId },
+  });
+};
+
 onActivated(async () => {
   if (uid == 0) return;
 
@@ -155,7 +163,7 @@ onBeforeUnmount(() => {
         ></div>
         <span>{{ Number(star) === 0 ? "" : star }}</span>
       </div>
-      <div class="pinglun-box">
+      <div class="pinglun-box" @click="commentPost">
         <div class="pinglun"></div>
         <span></span>
       </div>

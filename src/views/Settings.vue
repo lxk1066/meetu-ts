@@ -30,8 +30,7 @@ const logout = () => {
     message: "确认要退出登录么？",
   })
     .then(() => {
-      localStorage.removeItem("meetu_jwt_token");
-      localStorage.removeItem("meetu_uid");
+      localStorage.clear();
       location.reload();
     })
     .catch(() => {});
