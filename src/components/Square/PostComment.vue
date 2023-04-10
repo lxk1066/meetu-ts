@@ -329,10 +329,10 @@ const addCommentHandle = ({
       position: absolute;
       border-radius: 5px;
       bottom: 0px;
-      height: 60px;
+      height: 65px;
       width: 100%;
       text-align: center;
-      line-height: 65px;
+      line-height: 75px;
       font-size: 18px;
       color: rgb(0, 60, 255);
       background: linear-gradient(180deg, transparent, white, white);

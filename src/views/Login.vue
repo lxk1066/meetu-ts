@@ -2,7 +2,7 @@
 export default { name: "meetuLoginView" };
 </script>
 <script setup lang="ts" name="meetuLoginView">
-import { ref } from "vue";
+import { ref, onActivated } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {
   Button as vanButton,
@@ -20,7 +20,8 @@ const username = ref<string>("");
 const password = ref<string>("");
 const loginLoading = ref<boolean>(false);
 
-const redirect: string | null = (route.query?.redirect as string) ?? null;
+// 保存上一个页面的路由地址，用于重定向回去
+let redirect: string | null = null;
 
 const onLogin = async () => {
   loginLoading.value = true;
@@ -44,6 +45,11 @@ const goBack = async () => {
   await router.push("/");
   location.reload();
 };
+
+// 一进入页面就获取重定向地址
+onActivated(() => {
+  redirect = (route.query?.redirect as string) ?? null;
+});
 </script>
 
 <template>

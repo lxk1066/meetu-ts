@@ -190,6 +190,8 @@ router.beforeEach(async (to, from, next) => {
       next("/login");
     }
   } else {
+    if (loginStatus && to.path.startsWith("/login")) next("/");
+
     to.meta.auth = false;
     next();
   }

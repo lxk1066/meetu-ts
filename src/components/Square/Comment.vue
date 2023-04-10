@@ -72,9 +72,9 @@ const replySub = (
         </span>
       </div>
     </div>
-    <p class="comment-item-content">
-      {{ props.comment.content }}
-    </p>
+    <div class="comment-item-content">
+      <p style="margin: 5px 0">{{ props.comment.content }}</p>
+    </div>
     <!-- 子评论区域 -->
     <div class="sub-comment" v-if="props.comment.subComments">
       <div
@@ -108,18 +108,20 @@ const replySub = (
             </span>
           </div>
         </div>
-        <p class="comment-item-content sub-comment-item-content">
+        <div class="comment-item-content sub-comment-item-content">
           <!-- 回复子评论的用户名 -->
-          <span v-if="subComment.toCommentId" class="to-sub-comment-username">
-            {{
-              "@" +
-              props.comment.subComments.find(
-                (item) => item.id === subComment.toCommentId
-              )?.username
-            }}
-          </span>
-          {{ subComment.content }}
-        </p>
+          <p style="margin: 5px 0">
+            <span v-if="subComment.toCommentId" class="to-sub-comment-username">
+              {{
+                "@" +
+                props.comment.subComments.find(
+                  (item) => item.id === subComment.toCommentId
+                )?.username
+              }}
+            </span>
+            <span>&#160;{{ subComment.content }}</span>
+          </p>
+        </div>
       </div>
     </div>
   </div>
