@@ -5,8 +5,13 @@ export default {
 </script>
 <script setup lang="ts">
 import { ref, watch, onMounted, defineProps } from "vue";
-import { Loading as vanLoading, showToast } from "vant";
-import { useRoute } from "vue-router";
+import {
+  Icon as vanIcon,
+  Loading as vanLoading,
+  showToast,
+  showConfirmDialog,
+} from "vant";
+import { useRoute, useRouter } from "vue-router";
 import { useStore } from "@/stores";
 import getPostComment from "@/api/square/getPostComment";
 import getPostCommentList from "@/api/square/getPostCommentList";
@@ -20,6 +25,7 @@ import type { Comment, NewComment, CommentType } from "@/types/index";
 
 const store = useStore();
 const route = useRoute();
+const router = useRouter();
 
 const commentList = ref<Comment[] | null>(null);
 const rootComments = ref<NewComment[]>([]);
@@ -94,7 +100,7 @@ onMounted(async () => {
 
   if (result.code === 200) {
     commentList.value = result.data?.comments ?? [];
-    commentCount.value = result.data.comments.length;
+    commentCount.value = result.data.total;
     // 加载用户头像
     await loadAvatarList();
     // 将根评论和子评论筛到一起
@@ -112,6 +118,16 @@ onMounted(async () => {
 let commentCount = ref<number>(0);
 
 const commentBoxRef = ref<HTMLElement | null>(null);
+
+// 未登录状态时点击查看所有评论 提示登录
+const LoginComment = () => {
+  showConfirmDialog({
+    title: "提示",
+    message: "确认是否登录？",
+  }).then(() => {
+    router.push({ name: "login", query: { redirect: route.fullPath } });
+  });
+};
 
 // 是否展示commentInput
 const isShowCommentInput = ref<boolean>(false);
@@ -227,6 +243,16 @@ const addCommentHandle = ({
         @reply-comment="replyCommentHandle"
       ></comment-item>
 
+      <!-- 未登录时提示用户登录 -->
+      <div
+        class="prompt-login"
+        v-if="!store.loginStatus && rootComments.length"
+        @click="LoginComment"
+      >
+        <van-icon name="arrow-down" />
+        登录后查看所有评论
+      </div>
+
       <div class="empty" v-if="!loading && !commentCount">
         <span>快来发表你的评论吧</span>
       </div>
@@ -290,12 +316,26 @@ const addCommentHandle = ({
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    position: relative;
     .loading {
       margin-bottom: 10px;
     }
     .empty {
       display: inline-block;
       color: grey;
+    }
+    .prompt-login {
+      // transform: translateY(-40px);
+      position: absolute;
+      border-radius: 5px;
+      bottom: 0px;
+      height: 60px;
+      width: 100%;
+      text-align: center;
+      line-height: 65px;
+      font-size: 18px;
+      color: rgb(0, 60, 255);
+      background: linear-gradient(180deg, transparent, white, white);
     }
   }
 }
