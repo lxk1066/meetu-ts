@@ -3,6 +3,6 @@
  */
 
 // 后端服务器地址
-const BackendURL: string = "http://127.0.0.1:8000";
+const BackendURL: string = import.meta.env.VITE_BASE_URL;
 
 export { BackendURL };
