@@ -16,16 +16,16 @@ import type { Socket } from "socket.io-client";
 const store = useStore();
 const socket: Socket = inject("socket") as Socket;
 const showPopover = ref<boolean>(false);
-const actions: Array<{ text: string; icon: string }> = [
-  { text: "在线", icon: "checked" },
-  { text: "离线", icon: "clear" },
+const actions: Array<{ text: string; icon: string; type: string }> = [
+  { text: "在线", icon: "checked", type: "online" },
+  { text: "离线", icon: "clear", type: "offline" },
 ];
 
 const onSelect = (action: any): void => {
-  if (action.text === "在线") {
+  if (action.type === "online") {
     socket.connect();
     socket.emit("online-message", (socket as any).uid);
-  } else if (action.text === "离线") {
+  } else if (action.type === "offline") {
     socket.disconnect();
     store.changeOnlineStatus(false);
   }

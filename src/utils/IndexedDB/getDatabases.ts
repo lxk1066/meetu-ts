@@ -1,11 +1,12 @@
 /**
- * 获取本地存储中的所有数据库，即所有的聊天记录
+ * 获取本地存储中的所有数据库，即当前用户的所有聊天记录
+ * @param {String} uid 当前登录用户id
  * @returns {Promise<IDBDatabaseInfo[]>}
  */
-export const getDatabases = async (): Promise<IDBDatabaseInfo[]> => {
+export const getDatabases = async (uid: string): Promise<IDBDatabaseInfo[]> => {
   const dbs = window.indexedDB.databases
     ? await window.indexedDB.databases()
     : [];
-  const pattern = /^meetu_\d+_\d+_\d+$/;
+  const pattern = new RegExp(`^meetu_${uid}_\\d+_\\d+$`);
   return dbs.filter((item) => pattern.test(item.name as string));
 };

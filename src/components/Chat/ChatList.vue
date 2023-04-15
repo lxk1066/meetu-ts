@@ -1,6 +1,6 @@
 <script setup lang="ts" name="meetuChatList">
-import { ref, watch, onMounted, inject } from "vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted, inject, onActivated } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { useStore } from "@/stores";
 import {
   showConfirmDialog,
@@ -19,6 +19,7 @@ import { getDatabases } from "@/utils/IndexedDB/getDatabases";
 import formatTimeStamp from "@/utils/formatTimeStamp";
 import { addMessage } from "@/utils/IndexedDB/addMessage";
 import { getLastMessage } from "@/utils/IndexedDB/getLastMessage";
+import { getLastMsgReadStatus } from "@/utils/IndexedDB/getLastMsgReadStatus";
 import { clearMessages } from "@/utils/IndexedDB/clearMessages";
 import type { Socket } from "socket.io-client";
 
@@ -27,6 +28,7 @@ const loading = ref<boolean>(false);
 
 const store = useStore();
 const router = useRouter();
+const route = useRoute();
 
 const socket = inject("socket") as Socket;
 
@@ -65,7 +67,6 @@ const getUserInfo = async (ownUid: string, otherUid: string) => {
         profile: getProfile(res.data.profile),
       });
     }
-    chatList.value = objArraySort(chatList.value);
   }
 };
 
@@ -122,6 +123,9 @@ const onRefresh = () => {
       }
     }, 1000 * 5);
   }
+
+  // 重新加载chatList
+  reloadChatList();
 };
 
 // 点击关闭按钮的回调
@@ -169,35 +173,9 @@ const changeUnreadMsgCount = (value: number): void => {
   store.changeUnreadCount(value);
 };
 
-// 监听chatList的长度变化,发生变化就去改变state中的数据
-watch(
-  chatList,
-  () => {
-    // console.log('1@', chatList)
-    // chatList.value = objArraySort(chatList.value, 'time')
-    // console.log('2@', chatList)
-    // changeUnreadMsgCount(chatList.value.length)
-    // chatList.value = objArraySort(chatList.value, 'time')
-  },
-  { deep: true }
-);
-
 onMounted(async () => {
-  // 取出本地存储中的所有聊天记录然后循环调用 getUserInfo
-  const token = localStorage.getItem("meetu_jwt_token");
-  const uid = localStorage.getItem("meetu_uid");
-  if (token && uid) {
-    ownUId.value = uid;
-    const dbs = await getDatabases();
-    for (const item of dbs) {
-      const splits = (item.name as string).split("_");
-      const otherUid = splits[2] === uid.toString() ? splits[3] : splits[2];
-      await getUserInfo(uid, otherUid);
-    }
-  }
-
-  chatList.value = objArraySort(chatList.value); // 将chatList按照time值从大到小排列
-  changeUnreadMsgCount(chatList.value.length);
+  // 加载聊天列表
+  loadChatList();
 
   // 监听在线状态
   socket.on("online-message-reply-own", (isOnline: boolean) => {
@@ -219,6 +197,41 @@ onMounted(async () => {
     });
   });
 });
+
+onActivated(async () => {
+  reloadChatList();
+});
+
+// 加载chatList
+const loadChatList = async () => {
+  // 取出本地存储中的所有聊天记录然后循环调用 getUserInfo
+  if (store.loginStatus) {
+    const uid = route.meta.uid as string;
+    ownUId.value = uid;
+    let otherUid: string | number = "";
+    const dbs = await getDatabases(uid);
+
+    for (const item of dbs) {
+      const splits = (item.name as string).split("_");
+      otherUid = splits[2] === uid.toString() ? splits[3] : splits[2];
+      await getUserInfo(uid, otherUid);
+    }
+  }
+
+  chatList.value = objArraySort(chatList.value); // 将chatList按照time值从大到小排列
+  changeUnreadMsgCount(chatList.value.length);
+};
+
+// 重新加载chatList
+const reloadChatList = async () => {
+  for (const chat of chatList.value) {
+    chat.hasRead = await getLastMsgReadStatus(
+      ownUId.value,
+      ownUId.value,
+      chat.id
+    );
+  }
+};
 
 // 点击聊天列表中的某一个，跳转到对应的聊天窗口
 const openCell = (uid: string): void => {
@@ -378,7 +391,7 @@ const openCell = (uid: string): void => {
 <style lang="scss" scoped>
 .chatlist-container {
   width: 100%;
-  min-height: 90vh;
+  min-height: calc(99vh - var(--van-nav-bar-height) - var(--van-tabbar-height));
   .swipe-cell-list {
     max-height: 70px;
     .top-item {

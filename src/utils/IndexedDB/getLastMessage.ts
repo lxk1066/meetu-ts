@@ -1,12 +1,5 @@
 import { store } from "./init";
-
-interface msgObj {
-  from_uid: string;
-  to_uid: string;
-  message: string;
-  time: number;
-  hasRead: boolean;
-}
+import type { msgObj } from "@/types";
 
 export async function getLastMessage(
   uid: string,

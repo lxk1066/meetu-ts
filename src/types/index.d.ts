@@ -71,3 +71,12 @@ export declare interface NewComment extends Comment {
 }
 
 export declare type CommentType = "addRoot" | "replyRoot" | "replySub";
+
+// 本地存储的message类型
+export declare interface msgObj {
+  from_uid: string;
+  to_uid: string;
+  message: string;
+  time: number;
+  hasRead: boolean;
+}

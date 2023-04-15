@@ -5,7 +5,7 @@ import request from "@/utils/request";
 import type { AxiosResponse } from "axios";
 import type { UserInfo } from "@/types";
 
-interface ResponseData {
+export interface ResponseData {
   code: number;
   data: UserInfo;
 }

@@ -42,7 +42,6 @@ async function init() {
         socket.emit("online-message", (socket as any).uid);
         console.log("online-message");
         socket.on("online-message-reply-own", (isOnline) => {
-          console.log("isOnline", isOnline);
           store.changeOnlineStatus(isOnline);
         });
 

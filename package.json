@@ -6,7 +6,7 @@
     "dev": "vite",
     "build:dev": "run-p type-check build-dev",
     "build:prod": "run-p type-check build-prod",
-    "preview": "vite preview",
+    "preview": "vite preview --port 5173",
     "build-dev": "vite build --mode development",
     "build-prod": "vite build --mode production",
     "type-check": "vue-tsc --noEmit",
