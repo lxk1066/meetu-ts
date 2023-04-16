@@ -234,7 +234,12 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <van-nav-bar @click-left="onClickLeft" fixed placeholder>
+  <van-nav-bar
+    @click-left="onClickLeft"
+    fixed
+    placeholder
+    class="nav-bar-height"
+  >
     <template #left>
       <van-icon name="arrow-left" size="25" />
     </template>
@@ -327,9 +332,6 @@ onBeforeUnmount(() => {
 </template>
 
 <style lang="scss">
-:root {
-  --van-nav-bar-height: 60px;
-}
 .nav-bar-username {
   margin: 5px 20px 0px 20px;
   font-size: 18px;

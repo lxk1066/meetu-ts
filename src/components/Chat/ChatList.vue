@@ -391,7 +391,7 @@ const openCell = (uid: string): void => {
 <style lang="scss" scoped>
 .chatlist-container {
   width: 100%;
-  min-height: calc(99vh - var(--van-nav-bar-height) - var(--van-tabbar-height));
+  min-height: calc(99vh - 60px - var(--van-tabbar-height));
   .swipe-cell-list {
     max-height: 70px;
     .top-item {

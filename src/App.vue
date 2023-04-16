@@ -73,6 +73,17 @@ html,
   font-family: "Noto Sans", "Roboto Light", sans-serif;
 }
 
+// 自定义NavBar高度
+.nav-bar-height {
+  height: 60px !important;
+  & > div {
+    height: 60px !important;
+    & > div {
+      height: 60px !important;
+    }
+  }
+}
+
 @font-face {
   font-family: "Noto Sans";
   font-style: normal;

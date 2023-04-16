@@ -42,7 +42,13 @@ socket.on("online-message-reply-own", (isOnline) => {
 </script>
 
 <template>
-  <van-nav-bar title="聊天" fixed placeholder z-index="2">
+  <van-nav-bar
+    title="聊天"
+    fixed
+    placeholder
+    z-index="2"
+    class="nav-bar-height"
+  >
     <template #left>
       <van-popover
         v-model:show="showPopover"
@@ -75,7 +81,7 @@ socket.on("online-message-reply-own", (isOnline) => {
   <ChatList />
 </template>
 
-<style>
+<style lang="scss">
 .online-icon-box {
   width: 80px;
   height: 50px;
