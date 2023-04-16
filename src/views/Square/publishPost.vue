@@ -58,14 +58,17 @@ const onSubmit = async () => {
           (formData.value as FormData).append("pictures", item.file);
         });
       }
-      console.log(formData.value);
+
       // 上传服务器
       const token = localStorage.getItem("meetu_jwt_token");
       const { data: res } = await publishPost(token as string, formData.value);
       if (res.code === 200) {
         showSuccessToast("发布成功");
         submitFlag.value = false;
-        router.push({ name: "square" });
+        router.replace({
+          name: "postDetail",
+          params: { postId: res.data.postId },
+        });
       } else {
         showFailToast({ message: "发布失败, " + res.msg, duration: 2800 });
         submitFlag.value = false;
