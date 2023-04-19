@@ -90,9 +90,9 @@ const onRegister = async () => {
   }
 };
 
-const goBack = async () => {
-  await router.push("/");
-  location.reload();
+const goBack = () => {
+  router.push("/");
+  // location.reload();
 };
 </script>
 

@@ -41,9 +41,9 @@ const onLogin = async () => {
     });
   }
 };
-const goBack = async () => {
-  await router.push("/");
-  location.reload();
+const goBack = () => {
+  router.push("/");
+  // location.reload();
 };
 
 // 一进入页面就获取重定向地址

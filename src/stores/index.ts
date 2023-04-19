@@ -6,6 +6,7 @@ export const useStore = defineStore("index", () => {
     loginStatus: false,
     unreadCount: 0, // 未读消息数量
     onlineStatus: false, // 当前登录用户的在线状态
+    loginOverlayShow: false, // 登录模态框的显示与隐藏
   });
 
   const changeLoginStatus = (value: boolean) => {
@@ -17,12 +18,17 @@ export const useStore = defineStore("index", () => {
   const changeOnlineStatus = (value: boolean) => {
     state.onlineStatus = value;
   };
+  // 修改登录模态框的显示隐藏
+  const changeLoginOverLayShow = (value: boolean) => {
+    state.loginOverlayShow = value;
+  };
 
   return {
     ...toRefs(state),
     changeLoginStatus,
     changeUnreadCount,
     changeOnlineStatus,
+    changeLoginOverLayShow,
   };
 });
 

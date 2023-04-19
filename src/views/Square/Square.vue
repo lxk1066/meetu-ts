@@ -3,6 +3,7 @@ export default { name: "meetuSquare" };
 </script>
 <script setup lang="ts">
 import { onMounted, ref, onActivated, onDeactivated, onUnmounted } from "vue";
+import { useStore } from "@/stores";
 import { useRouter } from "vue-router";
 import {
   Icon as vanIcon,
@@ -10,6 +11,7 @@ import {
   PullRefresh as vanPullRefresh,
   List as vanList,
   BackTop as vanBackTop,
+  Button as vanButton,
   showFailToast,
 } from "vant";
 import Post from "@/components/Square/Post.vue";
@@ -19,6 +21,7 @@ import type { Post as PostBox } from "@/types";
 import type { PopoverAction } from "vant";
 
 const router = useRouter();
+const store = useStore();
 const loading = ref<boolean>(false);
 const listLoading = ref<boolean>(false);
 const listFinished = ref<boolean>(false);
@@ -31,6 +34,14 @@ const actions = [
 
 // 整个广场的HTML元素
 const squareEl = ref<HTMLElement | null>(null);
+
+// 点击登录和注册按钮
+const loginHandle = () => {
+  store.changeLoginOverLayShow(true);
+};
+const registerHandle = () => {
+  router.push({ name: "register" });
+};
 
 onMounted(async () => {
   if (postList.value.length <= 0) {
@@ -143,8 +154,15 @@ onUnmounted(() => {
         <h3>广场</h3>
       </div>
       <div class="header-right">
-        <!-- <van-icon name="photograph" size="25" /> -->
-        <van-icon name="ellipsis" class="ellipsis" />
+        <div class="sign-box" v-if="!store.loginStatus">
+          <van-button type="primary" size="mini" @click="loginHandle">
+            登录
+          </van-button>
+          <van-button plain type="primary" size="mini" @click="registerHandle">
+            注册
+          </van-button>
+        </div>
+        <van-icon v-else name="ellipsis" class="ellipsis" />
       </div>
     </div>
     <div class="square-main">
@@ -203,12 +221,23 @@ onUnmounted(() => {
     align-items: center;
     .header-left,
     .header-right {
+      width: 100px;
       margin: 0 10px;
+      display: flex;
+      justify-content: space-between;
       .ellipsis {
         transform: rotate(90deg);
         font-size: 20px;
         font-weight: bolder;
       }
+      .sign-box {
+        width: 80px;
+        display: flex;
+        justify-content: space-around;
+      }
+    }
+    .header-right {
+      justify-content: flex-end;
     }
   }
   .square-main {

@@ -19,9 +19,13 @@ export const usePostStar = (
 
     if (!token) {
       showToast({ message: "未登录", position: "bottom" });
+      starStatus.value = false;
     } else {
       const { data: res } = await starPost(postId, token);
-      if (res.code !== 200) showToast({ message: res.msg, position: "bottom" });
+      if (res.code !== 200)
+        !(starStatus.value = false) &&
+          showToast({ message: res.msg, position: "bottom" });
+      else starStatus.value = true;
     }
   };
 

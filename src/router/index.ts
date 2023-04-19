@@ -6,7 +6,7 @@ import verifyToken from "@/api/user/verifyToken";
 const routes: RouteRecordRaw[] = [
   {
     path: "/",
-    redirect: "/chatList",
+    redirect: "/square",
   },
   {
     path: "/login",

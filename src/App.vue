@@ -60,7 +60,7 @@ async function init() {
       <component :is="Component"></component>
     </keep-alive>
   </router-view>
-  <Login v-if="$route.meta.auth" />
+  <Login v-show="store.loginOverlayShow" />
 </template>
 
 <style lang="scss">

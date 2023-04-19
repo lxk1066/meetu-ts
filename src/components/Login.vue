@@ -4,7 +4,7 @@ export default {
 };
 </script>
 <script setup lang="ts">
-import { ref, onBeforeMount } from "vue";
+import { ref, watch } from "vue";
 import { useStore } from "@/stores";
 import {
   Button as vanButton,
@@ -12,17 +12,19 @@ import {
   Field as vanField,
   CellGroup as vanCellGroup,
   Overlay as vanOverlay,
+  Icon as vanIcon,
   showToast,
 } from "vant";
+import type { FormInstance } from "vant";
 
 import login from "@/api/user/login";
-import verifyToken from "@/api/user/verifyToken";
 
 const store = useStore();
-const show = ref<boolean>(false);
 const username = ref<string>("");
 const password = ref<string>("");
 const loginLoading = ref<boolean>(false);
+
+const loginFormRef = ref<FormInstance | null>(null);
 
 const onLogin = async (): Promise<void> => {
   loginLoading.value = true;
@@ -31,7 +33,7 @@ const onLogin = async (): Promise<void> => {
     loginLoading.value = false;
     localStorage.setItem("meetu_jwt_token", res.token);
     localStorage.setItem("meetu_uid", res.uid);
-    show.value = false;
+    store.changeLoginOverLayShow(false);
     location.reload();
   } else {
     loginLoading.value = false;
@@ -41,28 +43,37 @@ const onLogin = async (): Promise<void> => {
     });
   }
 };
-onBeforeMount(async () => {
-  const token = localStorage.getItem("meetu_jwt_token");
-  const uid = localStorage.getItem("meetu_uid");
-  if (token && uid) {
-    //  去服务器验证token
-    const { data: res } = await verifyToken(token);
-    show.value = res.code !== 200;
-    store.changeLoginStatus(true);
-  } else {
-    show.value = true;
+
+const closeOverlay = () => {
+  store.changeLoginOverLayShow(false);
+};
+
+const goRegister = () => {
+  closeOverlay();
+};
+
+// 当组件隐藏时，重置表单
+watch(
+  () => store.loginOverlayShow,
+  () => {
+    if (!store.loginOverlayShow) {
+      (loginFormRef.value as FormInstance).resetValidation();
+      username.value = "";
+      password.value = "";
+    }
   }
-});
+);
 </script>
 
 <template>
-  <van-overlay :show="show" class="mark-overlay">
+  <van-overlay :show="store.loginOverlayShow" class="mark-overlay" lock-scroll>
     <div class="login-box">
       <h2>登录</h2>
-      <van-form @submit="onLogin" class="login-form">
+      <van-icon name="cross" id="close-btn" @click="closeOverlay" />
+      <van-form @submit="onLogin" class="login-form" ref="loginFormRef">
         <van-cell-group inset>
           <van-field
-            v-model="username"
+            v-model.trim="username"
             name="用户名"
             label="账号"
             placeholder="用户名 &#47; 邮箱"
@@ -70,7 +81,7 @@ onBeforeMount(async () => {
           />
 
           <van-field
-            v-model="password"
+            v-model.trim="password"
             type="password"
             name="密码"
             label="密码"
@@ -79,7 +90,7 @@ onBeforeMount(async () => {
           />
         </van-cell-group>
         <p style="padding-left: 10px">
-          还没有账号？去<router-link to="/register" @click="show = false"
+          还没有账号？去<router-link to="/register" @click="goRegister"
             >&#160;注册</router-link
           >
         </p>
@@ -111,11 +122,17 @@ onBeforeMount(async () => {
   width: 90%;
   min-height: 280px;
   background-color: #efefef;
-  border-radius: 20px;
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   position: relative;
+  #close-btn {
+    font-size: 20px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
 }
 </style>
