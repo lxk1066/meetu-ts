@@ -1,6 +1,7 @@
 <script setup lang="ts" name="meetuSquarePostDetail">
 import { onBeforeMount, onBeforeUnmount, ref, defineProps } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+import { useStore } from "@/stores";
 import {
   NavBar as vanNavBar,
   Image as vanImage,
@@ -22,6 +23,8 @@ const props = defineProps<{
   postId: string;
 }>();
 
+const store = useStore();
+const route = useRoute();
 const router = useRouter();
 const postData = ref<Post | null>(null);
 const picturesRef = ref<HTMLImageElement | null>(null);
@@ -110,7 +113,13 @@ const picturePreview = () => {
 // 点击点赞按钮
 const starStatus = ref<boolean>(false); // 记录当前帖子的点赞状态
 
-const { dianzanHandler } = usePostStar(starStatus, props.postId);
+const { dianzanHandler } = usePostStar({
+  loginStatus: store.loginStatus,
+  token: (route.meta?.token as string) ?? undefined,
+  uid: (route.meta?.uid as string) ?? undefined,
+  postId: props.postId,
+  starStatus,
+});
 
 onBeforeUnmount(() => {
   if (pictureItems.length) {

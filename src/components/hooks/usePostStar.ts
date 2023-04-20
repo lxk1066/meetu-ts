@@ -5,27 +5,36 @@ import postStarStatus from "@/api/square/postStarStatus";
 import { throttle } from "@/utils/throttle";
 
 // 点击点赞按钮
-const token = localStorage.getItem("meetu_jwt_token") as string;
-const uid: string | number = token ? localStorage.getItem("meetu_uid") ?? 0 : 0;
 
-export const usePostStar = (
-  starStatus: Ref<boolean>,
-  postId: string | number
-) => {
+interface usePostStarArgs {
+  loginStatus: boolean;
+  token: string | undefined;
+  uid: string | number | undefined;
+  postId: string | number;
+  starStatus: Ref<boolean>;
+}
+
+export const usePostStar = ({
+  loginStatus,
+  token,
+  uid,
+  postId,
+  starStatus,
+}: usePostStarArgs) => {
   // 发起点赞请求
   const starPostFn = async (): Promise<void> => {
     if (count % 2 === 0) return;
     count = 0;
 
-    if (!token) {
+    if (!loginStatus) {
       showToast({ message: "未登录", position: "bottom" });
-      starStatus.value = false;
+      starStatus.value = !starStatus.value;
     } else {
-      const { data: res } = await starPost(postId, token);
-      if (res.code !== 200)
-        !(starStatus.value = false) &&
-          showToast({ message: res.msg, position: "bottom" });
-      else starStatus.value = true;
+      const { data: res } = await starPost(postId, token as string);
+      if (res.code !== 200) {
+        starStatus.value = !starStatus.value;
+        showToast({ message: res.msg, position: "bottom" });
+      }
     }
   };
 
@@ -57,9 +66,9 @@ export const usePostStar = (
   };
 
   onMounted(async () => {
-    if (uid == 0) return;
+    if (!loginStatus) return;
 
-    const res = await getPostStarStatus(postId, uid);
+    const res = await getPostStarStatus(postId, uid as string);
 
     if (res) {
       starStatus.value = true;
@@ -71,6 +80,6 @@ export const usePostStar = (
   return {
     dianzanHandler,
     getPostStarStatus,
-    uid,
+    uid: Number(uid),
   };
 };

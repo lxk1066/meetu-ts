@@ -5,7 +5,8 @@ export default {
 </script>
 <script setup lang="ts" name="meetuSquarePost">
 import { onActivated, onBeforeUnmount, ref, defineProps } from "vue";
-import { useRouter } from "vue-router";
+import { useStore } from "@/stores";
+import { useRoute, useRouter } from "vue-router";
 import {
   Icon as vanIcon,
   Image as vanImage,
@@ -34,6 +35,8 @@ const props = defineProps<{
   updatedTime: string | number;
 }>();
 
+const store = useStore();
+const route = useRoute();
 const router = useRouter();
 const picturesRef = ref<HTMLElement | null>(null);
 const isShowImagePreview = ref<boolean>(false);
@@ -73,10 +76,13 @@ const picturePreview = () => {
 // 点击点赞按钮
 const starStatus = ref<boolean>(false); // 记录当前帖子的点赞状态
 
-const { dianzanHandler, getPostStarStatus, uid } = usePostStar(
+const { dianzanHandler, getPostStarStatus, uid } = usePostStar({
+  loginStatus: store.loginStatus,
+  token: (route.meta?.token as string) ?? undefined,
+  uid: (route.meta?.uid as string) ?? undefined,
+  postId: props.postId,
   starStatus,
-  props.postId
-);
+});
 
 // 点击评论按钮
 const commentPost = () => {
