@@ -1,19 +1,19 @@
 /**
- * 发送`修改邮箱`的验证码邮件
+ * 验证旧邮箱地址
  */
 import request from "@/utils/request";
 import type { AxiosResponse } from "axios";
 
-function sendModifyMailboxLetter(
+function verifyOldEmail(
   token: string,
-  newEmail: string
+  oldEmail: string
 ): Promise<AxiosResponse> {
   return request({
     method: "post",
-    url: "/api/user/ModifyMailboxLetter",
+    url: "/api/user/verifyOldEmail",
+    data: { oldEmail },
     headers: { Authorization: token },
-    data: { newEmail },
   });
 }
 
-export default sendModifyMailboxLetter;
+export default verifyOldEmail;

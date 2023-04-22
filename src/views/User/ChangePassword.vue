@@ -10,6 +10,7 @@ import {
   showSuccessToast,
 } from "vant";
 import changePassword from "@/api/user/changePassword";
+import { passwordPattern as passwordReg } from "@/project.config";
 
 const props = defineProps<{
   token: string;
@@ -20,7 +21,7 @@ const password = ref<string>("");
 const confirmPassword = ref<string>("");
 
 const passwordPattern = (val: string) => {
-  return /^(?=.*[a-zA-Z])(?=.*[0-9])[A-Za-z0-9,._!@#$^&*]{8,20}$/.test(val);
+  return passwordReg.test(val);
 };
 const passwordErrText: string =
   "密码8~20位，必须包含大小写字母和数字，特殊字符可选(,._!@#$^&*)";

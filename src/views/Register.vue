@@ -17,6 +17,10 @@ import {
 import sendEmailVerifyCode from "@/api/user/emailVerifyCode";
 import register from "@/api/user/register";
 import verifyCodeCountdown from "@/utils/verifyCodeCountdown";
+import {
+  emailPattern as emailReg,
+  passwordPattern as passwordReg,
+} from "@/project.config";
 const router = useRouter();
 const username = ref<string>("");
 const password = ref<string>("");
@@ -28,13 +32,13 @@ const emailVerifyCodeBtnDisable = ref<boolean>(false); // 发送验证码按钮�
 
 const emailErrText: string = "邮箱不合法，请重新输入";
 const emailPattern = (val: string): boolean => {
-  return /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/.test(val);
+  return emailReg.test(val);
 };
 
 const passwordErrText: string =
   "密码8~20位，必须包含大小写字母和数字，特殊字符可选(,._!@#$^&*)";
 const passwordPattern = (val: string): boolean => {
-  return /^(?=.*[a-zA-Z])(?=.*[0-9])[A-Za-z0-9,._!@#$^&*]{8,20}$/.test(val);
+  return passwordReg.test(val);
 };
 
 const sendVerifyCode = async () => {

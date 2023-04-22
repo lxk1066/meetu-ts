@@ -39,9 +39,9 @@ const logout = () => {
 const showMuidPrompt = () => {
   showDialog({
     title: "MUID是什么？",
-    width: "300",
+    width: "330",
     message:
-      "MUID作为每个用户在平台内对外开放的唯一标识，是用户之间互相检索及添加联系方式的唯一途径。请手动设置您的个性MUID，否则你将无法与任何用户进行聊天！\n\nMUID支持6~10位的纯数字 或 小写英文字母+数字。",
+      "MUID作为每个用户在平台内与其他用户之间互相搜索及社交的唯一标识。请手动设置您的个性MUID，或者你也可以使用系统默认生成的MUID。最后请谨慎修改MUID！\n\nMUID支持6~10位的纯数字 或 小写英文字母+数字。",
   });
 };
 
@@ -91,6 +91,7 @@ const modifyMUIDIsShow = ref<boolean>(false);
         :email="ownEmail"
         v-if="modifyMailboxIsShow"
         @closePopup="modifyMailboxIsShow = false"
+        @updateEmail="ownEmail = $event"
       />
 
       <van-cell
