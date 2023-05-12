@@ -77,7 +77,10 @@ const loadUserInfo = async () => {
   }
 };
 const onSelect = (action: PopoverAction, index: number) => {
-  if (index === 0) router.push({ name: "pubPost" });
+  if (index === 0)
+    store.loginStatus
+      ? router.push({ name: "pubPost" })
+      : store.changeLoginOverLayShow(true);
 };
 const onRefresh = async () => {
   // 下拉刷新
