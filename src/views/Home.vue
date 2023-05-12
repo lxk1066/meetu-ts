@@ -5,6 +5,7 @@ export default { name: "meetuHome" };
 import { Tabbar as vanTabbar, TabbarItem as vanTabbarItem } from "vant";
 import { computed, ref } from "vue";
 import { useStore } from "@/stores";
+import { noCacheList } from "@/project.config";
 
 const active = ref<string>("chat");
 const store = useStore();
@@ -14,7 +15,7 @@ const unread = computed(() => store.unreadCount);
 
 <template>
   <router-view v-slot="{ Component }">
-    <keep-alive>
+    <keep-alive :exclude="noCacheList">
       <component :is="Component"></component>
     </keep-alive>
   </router-view>

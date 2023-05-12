@@ -19,6 +19,9 @@ import { useClipboard } from "@/components//hooks/useClipboard";
 import formatTimeStamp from "@/utils/formatTimeStamp";
 import isOwnFriend from "@/api/user/isOwnFriend";
 
+// 引入默认头像，避免网络延迟造成的头像显示异常
+import defaultProfile from "@/assets/imgs/defaultAvatar.png";
+
 const props = defineProps<{
   uid: string;
 }>();
@@ -140,7 +143,11 @@ useClipboard("#copyBtn", ".muid span", (status) => {
     <van-icon name="arrow-left" size="30" @click="goBack" class="go-back-btn" />
     <div id="avatar-box">
       <div style="position: relative; display: inline-block">
-        <img id="avatar" :src="userProfile" alt="头像" />
+        <img
+          id="avatar"
+          :src="userProfile == '' ? defaultProfile : userProfile"
+          alt="头像"
+        />
         <span v-if="gender === 'male'" class="gender">♂</span>
         <span v-else-if="gender === 'female'" class="gender">♀</span>
         <span v-else></span>

@@ -1,23 +1,13 @@
 <script setup lang="ts">
-import { onBeforeUnmount, provide, ref } from "vue";
+import { onBeforeUnmount, provide } from "vue";
 import { useStore } from "@/stores";
 import socket from "@/utils/socket/socket";
 import Login from "@/components/Login.vue";
 import verifyToken from "./api/user/verifyToken";
+import { noCacheList } from "@/project.config";
 
 provide("socket", socket);
 const store = useStore();
-
-// 记录不需要被Keepalive缓存的组件名
-const noCatchList = ref<string[]>([
-  "meetuChatWindow",
-  "meetuSquarePostDetail",
-  "meetuNotices",
-  "meetuEditUserInfo",
-  "meetuSettings",
-  "meetuDetail",
-  "meetuPublishPost",
-]);
 
 init();
 
@@ -56,7 +46,7 @@ async function init() {
 
 <template>
   <router-view v-slot="{ Component }">
-    <keep-alive :exclude="noCatchList">
+    <keep-alive :exclude="noCacheList">
       <component :is="Component"></component>
     </keep-alive>
   </router-view>

@@ -18,6 +18,9 @@ import getUserPostList from "@/api/square/getUserPostList";
 import { useClipboard } from "@/components/hooks/useClipboard";
 import formatTimeStamp from "@/utils/formatTimeStamp";
 
+// 引入默认头像，避免网络延迟造成的头像显示异常
+import defaultProfile from "@/assets/imgs/defaultAvatar.png";
+
 const router = useRouter();
 
 const isLoading = ref<boolean>(true);
@@ -109,7 +112,11 @@ useClipboard("#copyBtn", ".muid span", (status) => {
   <div class="header-box" :style="{ backgroundImage: `url(${headerImage})` }">
     <div id="avatar-box">
       <div style="position: relative; display: inline-block">
-        <img id="avatar" :src="userProfile" ait="头像" />
+        <img
+          id="avatar"
+          :src="userProfile == '' ? defaultProfile : userProfile"
+          ait="头像"
+        />
         <span v-if="gender === 'male'" class="gender">♂</span>
         <span v-else-if="gender === 'female'" class="gender">♀</span>
         <span v-else></span>
