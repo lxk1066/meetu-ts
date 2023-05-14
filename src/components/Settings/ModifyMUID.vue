@@ -1,5 +1,6 @@
 <script setup lang="ts" name="meetuModifyMUID">
 import { ref, defineProps, defineEmits } from "vue";
+import { useRoute } from "vue-router";
 import modifyUserMUID from "@/api/user/modifyUserMUID";
 import {
   Popup as vanPopup,
@@ -17,6 +18,8 @@ const emits = defineEmits<{
   (e: "closePopup"): void;
 }>();
 
+const route = useRoute();
+
 const isShow = ref<boolean>(true);
 const btnIsDisable = ref<boolean>(false); // 点击修改按钮后禁用按钮，实现防抖
 const ownMuid = ref(props.muid);
@@ -29,7 +32,7 @@ const modifyMUID = async () => {
   btnIsDisable.value = true;
   if (muidPattern.test(ownMuid.value)) {
     // 向服务器请求修改MUID
-    const token = localStorage.getItem("meetu_jwt_token");
+    const token = route.meta.token as string;
     const { data: res } = await modifyUserMUID(token as string, ownMuid.value);
     if (res.code === 200) {
       showSuccessToast("修改成功");

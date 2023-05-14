@@ -3,45 +3,17 @@ import { onBeforeUnmount, provide } from "vue";
 import { useStore } from "@/stores";
 import socket from "@/utils/socket/socket";
 import Login from "@/components/Login.vue";
-import verifyToken from "./api/user/verifyToken";
 import { noCacheList } from "@/project.config";
+import { useAppInit } from "@/components/hooks/useAppInit";
 
 provide("socket", socket);
 const store = useStore();
-
-init();
 
 onBeforeUnmount(() => {
   if (socket.connected) socket.disconnect();
 });
 
-async function init() {
-  // 一进来就立即与服务器建立socket.io连接
-  const token = localStorage.getItem("meetu_jwt_token");
-  const uid = localStorage.getItem("meetu_uid");
-  if (token && uid) {
-    const { data: res } = await verifyToken(token);
-    if (res.code === 200) {
-      if (!socket.connected) socket.connect();
-      socket.on("connect", () => {
-        console.log("connect", socket.id);
-        socket.emit("set-user-id", uid);
-        (socket as any).uid = uid;
-
-        // 更新当前用户的在线状态
-        socket.emit("online-message", (socket as any).uid);
-        console.log("online-message");
-        socket.on("online-message-reply-own", (isOnline) => {
-          store.changeOnlineStatus(isOnline);
-        });
-
-        socket.on("disconnect", () => {
-          console.log("disconnect", socket.id); // undefined
-        });
-      });
-    }
-  }
-}
+useAppInit(socket);
 </script>
 
 <template>

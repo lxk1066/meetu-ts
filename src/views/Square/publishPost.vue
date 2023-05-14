@@ -12,9 +12,10 @@ import {
   showSuccessToast,
   showFailToast,
 } from "vant";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import publishPost from "@/api/square/publishPost";
 
+const route = useRoute();
 const router = useRouter();
 const title = ref<string>("");
 const content = ref<string>("");
@@ -60,7 +61,7 @@ const onSubmit = async () => {
       }
 
       // 上传服务器
-      const token = localStorage.getItem("meetu_jwt_token");
+      const token = route.meta.token as string;
       const { data: res } = await publishPost(token as string, formData.value);
       if (res.code === 200) {
         showSuccessToast("发布成功");

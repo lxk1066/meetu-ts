@@ -36,7 +36,6 @@ export const store = (
       reject(e.target);
     };
     request.onsuccess = function (e) {
-      console.log("打开数据库成功");
       resolve((e.target as any).result);
     };
   });

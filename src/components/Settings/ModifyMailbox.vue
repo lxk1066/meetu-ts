@@ -119,7 +119,7 @@ const fetchVerityOldEmail = async (oldEmail: string) => {
 // 点击修改邮箱地址按钮
 const modifyEmailHandler = async () => {
   if (emailPattern.test(newEmail.value)) {
-    const token = localStorage.getItem("meetu_jwt_token");
+    const token = route.meta.token as string;
     const { data: res } = await modifyMailbox(
       token as string,
       verifyCode.value,

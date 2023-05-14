@@ -17,6 +17,7 @@ import {
 import Post from "@/components/Square/Post.vue";
 import getPostList from "@/api/square/getPostList";
 import getMuidUserInfo from "@/api/user/getMuidUserInfo";
+import { throttle } from "@/utils/throttle";
 import type { Post as PostBox } from "@/types";
 import type { PopoverAction } from "vant";
 
@@ -117,11 +118,9 @@ const onLoad = async () => {
 };
 
 // 记录广场的浏览位置，下次进来自动跳到上一次离开时的位置
-const scrollTopHandler = () => {
-  if (window.scrollY % 2 === 0) {
-    localStorage.setItem("SquareScrollTop", String(window.scrollY));
-  }
-};
+const scrollTopHandler = throttle(() => {
+  localStorage.setItem("SquareScrollTop", String(window.scrollY));
+}, 500);
 
 onActivated(() => {
   window.addEventListener("scroll", scrollTopHandler);

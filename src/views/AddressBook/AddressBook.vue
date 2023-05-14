@@ -43,7 +43,7 @@ onActivated(async () => {
 });
 
 onBeforeMount(async () => {
-  const token = localStorage.getItem("meetu_jwt_token");
+  const token = route.meta.token as string;
   const { data: res1 } = await getAllFriends(token as string);
   if (res1.code === 200) {
     const { friends } = res1.data;

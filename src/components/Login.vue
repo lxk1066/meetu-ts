@@ -19,6 +19,8 @@ import type { FormInstance } from "vant";
 
 import login from "@/api/user/login";
 
+import { TokenKey, UidKey } from "@/project.config";
+
 const store = useStore();
 const username = ref<string>("");
 const password = ref<string>("");
@@ -31,8 +33,8 @@ const onLogin = async (): Promise<void> => {
   const { data: res } = await login(username.value, password.value);
   if (res.code === 200) {
     loginLoading.value = false;
-    localStorage.setItem("meetu_jwt_token", res.token);
-    localStorage.setItem("meetu_uid", res.uid);
+    localStorage.setItem(TokenKey, res.token);
+    localStorage.setItem(UidKey, res.uid);
     store.changeLoginOverLayShow(false);
     location.reload();
   } else {

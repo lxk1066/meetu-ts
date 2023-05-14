@@ -21,10 +21,10 @@ import {
 } from "vant";
 import getPersonInfo from "@/api/user/getPersonInfo";
 import getProfile from "@/api/user/getProfile";
-import verifyToken from "@/api/user/verifyToken";
 import { addMessage } from "@/utils/IndexedDB/addMessage";
 import { getAllMessages } from "@/utils/IndexedDB/getAllMessages";
 import { putMessageReaded } from "@/utils/IndexedDB/putMessageReaded";
+import { useListenMsg } from "@/components/hooks/useListenMsg";
 
 import type { Socket } from "socket.io-client";
 import type { Message, Info } from "@/types";
@@ -49,15 +49,7 @@ const onClickLeft = () => {
 }; // 点击左上角返回按钮的回调函数
 
 onBeforeMount(async () => {
-  // 验证jwt_token
-  const token = localStorage.getItem("meetu_jwt_token");
-  const myId = localStorage.getItem("meetu_uid");
-  if (token && myId) {
-    const { data: res } = await verifyToken(token);
-    if (res.code !== 200) await router.push("/");
-  } else {
-    await router.push("/");
-  }
+  const myId = route.meta.uid as string;
   // 获取自己的个人信息
   const { data: myRes } = await getPersonInfo(myId as string);
   if (myRes.code === 200) {
@@ -140,22 +132,17 @@ onMounted(() => {
   // const videos = document.querySelector('.msg-row .message video')
   // console.log(videos.querySelector('source').src)
   // 监听新消息
-  socket.on("private-message", (fromId, toId, msg, time) => {
-    console.log("chatWindow", fromId, msg);
-    createMsg("string", "own", msg);
-    scrollToBottom();
-    addMessage(ownInfo.id as string, fromId, toId, {
-      from_uid: fromId,
-      to_uid: toId,
-      message: msg,
-      time: time,
-      hasRead: false,
-    });
-  });
+  useListenMsg(
+    { socket, userId: ownInfo.id as string, isRead: true },
+    ({ msg }: any) => {
+      createMsg("string", "own", msg);
+      scrollToBottom();
+    }
+  );
 });
 
 // 跳转到聊天窗口的最底下
-const scrollToBottom = () => {
+let scrollToBottom = () => {
   nextTick(() => {
     (document.querySelector("#bottom") as Element).scrollIntoView({
       behavior: "auto",
@@ -230,6 +217,7 @@ const openDetail = (to: Message["to"]) => {
 
 onBeforeUnmount(() => {
   clearInterval(updateOnlineInterval);
+  scrollToBottom = () => {}; // 解决离开chatWindow页面后仍然触发导致报错的问题
 });
 </script>
 

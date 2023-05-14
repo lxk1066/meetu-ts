@@ -1,7 +1,7 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 import type { RouteRecordRaw } from "vue-router";
-import { useStore } from "@/stores";
-import verifyToken from "@/api/user/verifyToken";
+import { checkLogin } from "@/utils/checkLogin";
+import { TokenKey, UidKey, authRoutes, noAuthRoutes } from "@/project.config";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -163,25 +163,17 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-  const token = localStorage.getItem("meetu_jwt_token");
-  const uid = localStorage.getItem("meetu_uid");
+  const token = localStorage.getItem(TokenKey);
+  const uid = localStorage.getItem(UidKey);
   const loginStatus = await checkLogin(token, uid);
   if (loginStatus) {
     to.meta.token = token;
     to.meta.uid = uid;
   }
 
-  const noAuthArr = [
-    "/register",
-    "/login",
-    "/changePassword/",
-    "/square",
-    "/square/postDetail/",
-  ]; // 不需要登录授权的路由数组
-  const authArr = ["/square/pubPost"]; // 需要登录授权的路由数组(不含全部)
   if (
-    authArr.some((item) => to.path.startsWith(item)) ||
-    !noAuthArr.some((item) => to.path.startsWith(item))
+    authRoutes.some((item) => to.path.startsWith(item)) ||
+    !noAuthRoutes.some((item) => to.path.startsWith(item))
   ) {
     to.meta.auth = true;
     if (loginStatus) {
@@ -196,18 +188,5 @@ router.beforeEach(async (to, from, next) => {
     next();
   }
 });
-
-async function checkLogin(token: string | null, uid: string | null) {
-  const store = useStore();
-  if (token && uid) {
-    //  去服务器验证token
-    const { data: res } = await verifyToken(token);
-    store.changeLoginStatus(res.code == 200);
-    return res.code === 200;
-  } else {
-    store.changeLoginStatus(false);
-    return false;
-  }
-}
 
 export default router;

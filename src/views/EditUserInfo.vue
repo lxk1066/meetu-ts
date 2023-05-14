@@ -13,6 +13,7 @@ import {
   Area as vanArea,
   showToast,
 } from "vant";
+import { useRoute } from "vue-router";
 import { areaList } from "@vant/area-data"; // vant官方提供的默认的中国省市区数据，用于选中地区
 import getPersonInfo from "@/api/user/getPersonInfo";
 import uploadProfile from "@/api/user/uploadProfile";
@@ -23,6 +24,8 @@ import updateSign from "@/api/user/updateSign";
 import updateArea from "@/api/user/updateArea";
 import type { UploaderFileListItem } from "vant";
 
+const route = useRoute();
+
 const onClickLeft = () => history.back();
 const profile = ref<UploaderFileListItem[]>([]);
 const uploadDisable = ref<boolean>(true);
@@ -31,7 +34,7 @@ const username = ref<string>(""); // 用户名
 const genderChecked = ref<string>("1"); // 性别
 const sign = ref<string>(""); // 个性签名
 
-const token: string = localStorage.getItem("meetu_jwt_token") as string;
+const token: string = route.meta.token as string;
 
 // areaList.province_list["000000"] = "保密";
 // objArraySort(areaList.province_list)

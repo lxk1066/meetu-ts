@@ -16,6 +16,8 @@ import {
 
 import type { UserInfo } from "@/types";
 
+import { TokenKey } from "@/project.config";
+
 // const props = defineProps<{
 //   show: string;
 // }>();
@@ -38,7 +40,7 @@ const search = async (): Promise<void> => {
   if (searchResult.length) searchResult.splice(0, searchResult.length); // 清空数组
   if (searchStr.value) {
     searchBtnDisable.value = true;
-    const token = localStorage.getItem("meetu_jwt_token");
+    const token = localStorage.getItem(TokenKey);
     const { data: res } = await searchMUID(searchStr.value, token as string);
     if (res.code === 200) {
       const users = res.data.users;

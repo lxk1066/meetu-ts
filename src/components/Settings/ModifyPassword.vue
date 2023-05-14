@@ -1,7 +1,10 @@
 <script setup lang="ts" name="meetuModifyPassword">
 import { ref, defineEmits, defineProps } from "vue";
+import { useRoute } from "vue-router";
 import { Popup as vanPopup, Button as vanButton, showToast } from "vant";
 import sendModifyPasswordEmail from "@/api/user/modifyPassword";
+
+const route = useRoute();
 
 const isShow = ref<boolean>(true);
 const sendBtnIsDisable = ref<boolean>(false);
@@ -20,7 +23,7 @@ const closePopup = () => {
 
 const sendEmail = async () => {
   sendBtnIsDisable.value = true;
-  const token = localStorage.getItem("meetu_jwt_token");
+  const token = route.meta.token as string;
   const { data: res } = await sendModifyPasswordEmail(token as string);
   if (res.code === 200) {
     // 邮件发送成功

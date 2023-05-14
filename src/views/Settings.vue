@@ -3,7 +3,7 @@ export default { name: "meetuSettings" };
 </script>
 <script setup lang="ts">
 import { onBeforeMount, ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import {
   Icon as vanIcon,
   Button as vanButton,
@@ -16,10 +16,10 @@ import {
 import ModifyMailbox from "@/components/Settings/ModifyMailbox.vue";
 import ModifyPassword from "@/components/Settings/ModifyPassword.vue";
 import ModifyMUID from "@/components/Settings/ModifyMUID.vue";
-import verifyToken from "@/api/user/verifyToken";
 import getUserMailbox from "@/api/user/getUserMailbox";
 import getUserMUID from "@/api/user/getUserMUID";
 
+const route = useRoute();
 const router = useRouter();
 const ownEmail = ref<string>("");
 const muid = ref<string>("");
@@ -46,15 +46,8 @@ const showMuidPrompt = () => {
 };
 
 onBeforeMount(async () => {
-  // 验证jwt_token
-  const token = localStorage.getItem("meetu_jwt_token");
-  const uid = localStorage.getItem("meetu_uid");
-  if (token && uid) {
-    const { data: res } = await verifyToken(token);
-    if (res.code !== 200) await router.push("/");
-  } else {
-    await router.push("/");
-  }
+  const token = route.meta.token as string;
+  const uid = route.meta.uid as string;
   // 获取自己的邮箱地址
   const { data: res } = await getUserMailbox(token as string);
   if (res.code === 200) {

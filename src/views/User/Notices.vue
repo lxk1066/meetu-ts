@@ -13,7 +13,7 @@ import {
   showFailToast,
   showSuccessToast,
 } from "vant";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import getAllNotices from "@/api/notice/getAllNotices";
 import getMuidUserInfo from "@/api/user/getMuidUserInfo";
 import getProfile from "@/api/user/getProfile";
@@ -27,10 +27,12 @@ import type { NoticeInfo } from "@/types";
 const allNotices = ref<Notice[]>([]);
 const allInfo = ref<NoticeInfo[]>([]);
 const router = useRouter();
+const route = useRoute();
 const goBack = () => router.back();
 
+const token = route.meta.token as string;
+
 onBeforeMount(async () => {
-  const token = localStorage.getItem("meetu_jwt_token") as string;
   const { data: res } = await getAllNotices(token);
   if (res.code === 200) {
     allNotices.value = res.data.notices;
@@ -63,7 +65,6 @@ const getUserInfo = async (muid: string) => {
 
 const agree = async (index: number) => {
   // 同意好友申请
-  const token = localStorage.getItem("meetu_jwt_token") as string;
   const { data: res } = await agreeFriendRequest(
     token,
     allNotices.value[index].id
@@ -82,7 +83,6 @@ const agree = async (index: number) => {
 
 const disagree = async (index: number) => {
   // 拒绝好友申请
-  const token = localStorage.getItem("meetu_jwt_token") as string;
   const { data: res } = await disagreeFriendRequest(
     token,
     allNotices.value[index].id
@@ -99,7 +99,6 @@ const disagree = async (index: number) => {
 
 const delNotice = async (index: number) => {
   // 删除
-  const token = localStorage.getItem("meetu_jwt_token") as string;
   const { data: res } = await deleteNotice(token, allNotices.value[index].id);
   if (res.code === 200) {
     allNotices.value.splice(index, 1);

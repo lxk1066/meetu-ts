@@ -10,7 +10,7 @@ import {
   showFailToast,
   showSuccessToast,
 } from "vant";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import getPersonInfo from "@/api/user/getPersonInfo";
 import getProfile from "@/api/user/getProfile";
 import addFriendRequest from "@/api/notice/addFriendRequest";
@@ -23,6 +23,7 @@ const props = defineProps<{
 const message = ref<string>("");
 const info = ref<UserInfo | null>(null);
 const router = useRouter();
+const route = useRoute();
 const goBack = () => router.back();
 onBeforeMount(async () => {
   const { data: res } = await getPersonInfo(props.uid);
@@ -34,7 +35,7 @@ onBeforeMount(async () => {
 });
 
 const sendRequest = async () => {
-  const token = localStorage.getItem("meetu_jwt_token");
+  const token = route.meta.token as string;
   const { data: res } = await addFriendRequest(
     token as string,
     (info.value as UserInfo).muid,

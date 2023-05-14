@@ -25,3 +25,21 @@ export const noCacheList: string[] = [
   "meetuDetail",
   "meetuPublishPost",
 ];
+
+// 本地存储(localStorage)的token key键名
+export const TokenKey = "meetu_jwt_token";
+
+// 本地存储(localStorage)的用户ID key
+export const UidKey = "meetu_uid";
+
+// 不需要登录鉴权的路由列表
+export const noAuthRoutes = [
+  "/register",
+  "/login",
+  "/changePassword/",
+  "/square",
+  "/square/postDetail/",
+];
+
+// 需要登录授权的路由列表(不含全部)
+export const authRoutes = ["/square/pubPost"];

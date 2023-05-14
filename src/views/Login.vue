@@ -13,6 +13,7 @@ import {
   showToast,
 } from "vant";
 import login from "@/api/user/login";
+import { TokenKey, UidKey } from "@/project.config";
 
 const route = useRoute();
 const router = useRouter();
@@ -28,8 +29,8 @@ const onLogin = async () => {
   const { data: res } = await login(username.value, password.value);
   if (res.code === 200) {
     loginLoading.value = false;
-    localStorage.setItem("meetu_jwt_token", res.token);
-    localStorage.setItem("meetu_uid", res.uid);
+    localStorage.setItem(TokenKey, res.token);
+    localStorage.setItem(UidKey, res.uid);
 
     if (redirect) router.replace(redirect);
     else router.push("/");
