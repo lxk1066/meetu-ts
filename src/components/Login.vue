@@ -21,6 +21,8 @@ import login from "@/api/user/login";
 
 import { TokenKey, UidKey } from "@/project.config";
 
+import sha256 from "crypto-js/sha256";
+
 const store = useStore();
 const username = ref<string>("");
 const password = ref<string>("");
@@ -30,7 +32,13 @@ const loginFormRef = ref<FormInstance | null>(null);
 
 const onLogin = async (): Promise<void> => {
   loginLoading.value = true;
-  const { data: res } = await login(username.value, password.value);
+
+  // 对密码进行加密传输
+  if (password.value.length > 255)
+    showToast({ message: "密码长度超出限制", position: "bottom" });
+  const pwd = sha256(password.value).toString();
+
+  const { data: res } = await login(username.value, pwd);
   if (res.code === 200) {
     loginLoading.value = false;
     localStorage.setItem(TokenKey, res.token);
