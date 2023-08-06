@@ -19,6 +19,8 @@ import getPicture from "@/api/square/getPicture";
 import { usePostStar } from "@/components/hooks/usePostStar";
 import type { Post } from "@/types";
 
+import downloadImg from "@/utils/downloadImg";
+
 const props = defineProps<{
   postId: string;
 }>();
@@ -78,11 +80,19 @@ const pictureItemFn = (e: Event) => {
 
 // 长按图片弹出保存
 const isShowCopyImage = ref<boolean>(false);
+const copyImageIndex = ref<number>(0); // 长按图片时将当前图片索引保存
 const copyImage = (e: { index: number }) => {
   console.log(e.index);
   isShowCopyImage.value = true;
+  copyImageIndex.value = e.index;
 };
-const copyImageActions = [{ name: "保存图片到手机" }];
+
+// 点击保存图片时的回调函数
+const downloadImage = () => {
+  downloadImg(images.value[copyImageIndex.value]);
+};
+
+const copyImageActions = [{ name: "保存图片到手机", callback: downloadImage }];
 
 onBeforeMount(async () => {
   window.scroll({ top: 0 });

@@ -28,7 +28,7 @@ const listLoading = ref<boolean>(false);
 const listFinished = ref<boolean>(false);
 const showPopover = ref<boolean>(false);
 const postList = ref<PostBox[]>([]);
-const actions = [
+const actions: PopoverAction[] = [
   { text: "图文", icon: "photo" },
   { text: "拍照", icon: "photograph" },
 ];
@@ -52,7 +52,7 @@ onMounted(async () => {
     if (res.code === 200) {
       postList.value = res.data.result;
       loading.value = false;
-      loadUserInfo().catch(() => {
+      loadUserInfo(postList.value).catch(() => {
         showFailToast({
           message: "部分用户信息获取失败",
           position: "bottom",
@@ -62,9 +62,14 @@ onMounted(async () => {
   }
 });
 
-const loadUserInfo = async () => {
-  window.scroll({ top: 0 });
-  for (const item of postList.value) {
+/**
+ * 加载用户信息
+ * @param postList 帖子信息列表
+ * @param top 是否滚动到顶部
+ */
+const loadUserInfo = async (postList: PostBox[], top: boolean = true) => {
+  if (top) window.scroll({ top: 0 });
+  for (const item of postList) {
     const { data: res } = await getMuidUserInfo(item.muid);
     if (res.code === 200) {
       item.uid = res.data.uid;
@@ -91,7 +96,7 @@ const onRefresh = async () => {
     postList.value = [];
     postList.value = res.data.result;
     loading.value = false;
-    loadUserInfo().catch(() => {
+    loadUserInfo(postList.value).catch(() => {
       showFailToast({
         message: "部分用户信息获取失败",
         position: "bottom",
@@ -110,6 +115,12 @@ const onLoad = async () => {
       listFinished.value = true;
     } else {
       postList.value.push(...res.data.result);
+      loadUserInfo(res.data.result, false).catch(() => {
+        showFailToast({
+          message: "部分用户信息获取失败",
+          position: "bottom",
+        });
+      });
     }
     listLoading.value = false;
   } else {
