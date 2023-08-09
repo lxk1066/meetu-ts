@@ -1,6 +1,6 @@
-import { BackendURL } from "@/project.config";
+import { SocketURL } from "@/project.config";
 import { io } from "socket.io-client";
 
-const socket = io(BackendURL);
+const socket = io(SocketURL);
 
 export default socket;

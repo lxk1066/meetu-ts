@@ -1,9 +1,9 @@
 <script lang="ts">
-export default { name: "meetuSearch" };
+export default { name: "meetuMatch" };
 </script>
-<script setup lang="ts" name="meetuSearch">
+<script setup lang="ts" name="meetuMatch">
 import { ref } from "vue";
-const name = ref("search");
+const name = ref("match");
 </script>
 
 <template>

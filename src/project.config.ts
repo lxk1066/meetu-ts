@@ -5,6 +5,9 @@
 // 后端服务器地址
 export const BackendURL: string = import.meta.env.VITE_BASE_URL;
 
+// websocket服务端地址
+export const SocketURL: string = import.meta.env.VITE_WEBSOCKET_URL;
+
 // 邮箱地址的正则表达式
 export const emailPattern: RegExp =
   /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;

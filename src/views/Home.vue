@@ -22,9 +22,9 @@ const unread = computed(() => store.unreadCount);
   <van-tabbar class="tab-bar" v-model="active" route placeholder>
     <van-tabbar-item
       class="tabbar-item"
-      to="/search"
-      name="search"
-      icon="search"
+      to="/match"
+      name="match"
+      icon="aim"
       >匹配</van-tabbar-item
     >
     <van-tabbar-item

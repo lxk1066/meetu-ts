@@ -96,14 +96,13 @@ const routes: RouteRecordRaw[] = [
   },
   {
     // 匹配
-    path: "/search",
-    name: "search",
+    path: "/match",
     component: () => import("@/views/Home.vue"),
     children: [
       {
         path: "",
-        name: "search",
-        component: () => import("@/views/Search.vue"),
+        name: "match",
+        component: () => import("@/views/Match.vue"),
       },
     ],
   },
