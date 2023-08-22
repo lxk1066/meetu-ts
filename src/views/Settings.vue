@@ -113,7 +113,6 @@ const modifyMUIDIsShow = ref<boolean>(false);
         @click="modifyPasswordIsShow = true"
       />
       <ModifyPassword
-        :email="ownEmail"
         v-if="modifyPasswordIsShow"
         @closePopup="modifyPasswordIsShow = false"
       />

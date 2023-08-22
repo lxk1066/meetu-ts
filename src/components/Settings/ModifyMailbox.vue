@@ -6,7 +6,6 @@ import {
   Popup as vanPopup,
   Field as vanField,
   CellGroup as vanCellGroup,
-  Icon as vanIcon,
   showToast,
   showFailToast,
   showSuccessToast,
@@ -100,11 +99,6 @@ const nextStepBtn = async () => {
   }
 };
 
-// 返回到上一步
-const reBack = () => {
-  isNextStep.value = !isNextStep.value;
-};
-
 // 发起验证旧邮箱的请求
 const fetchVerityOldEmail = async (oldEmail: string) => {
   const token: string = route.meta.token as string;
@@ -159,9 +153,8 @@ const modifyEmailHandler = async () => {
       :class="{ 'enter-ani': !isNextStep, 'leave-ani': isNextStep }"
     >
       <div class="tips">
-        我们需要验证您的邮箱地址:
-        <span class="old-email">{{ props.email }}</span>
-        ，请输入完整的邮箱地址，以验证您的身份。
+        请输入完整的旧邮箱地址，以验证您的身份:
+        <div class="old-email">{{ props.email }}</div>
       </div>
       <van-cell-group inset>
         <van-field
@@ -192,10 +185,6 @@ const modifyEmailHandler = async () => {
       v-else
       :class="{ 'enter-ani': isNextStep, 'leave-ani': !isNextStep }"
     >
-      <div class="reBack" @click="reBack">
-        <van-icon name="revoke" />
-        <span>返回</span>
-      </div>
       <van-cell-group inset>
         <van-field
           v-model="newEmail"

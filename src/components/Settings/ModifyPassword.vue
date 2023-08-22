@@ -1,5 +1,5 @@
 <script setup lang="ts" name="meetuModifyPassword">
-import { ref, defineEmits, defineProps } from "vue";
+import { ref, defineEmits } from "vue";
 import { useRoute } from "vue-router";
 import { Popup as vanPopup, Button as vanButton, showToast } from "vant";
 import sendModifyPasswordEmail from "@/api/user/modifyPassword";
@@ -11,10 +11,6 @@ const sendBtnIsDisable = ref<boolean>(false);
 
 const emits = defineEmits<{
   (e: "closePopup"): void;
-}>();
-
-const props = defineProps<{
-  email: string;
 }>();
 
 const closePopup = () => {
@@ -51,8 +47,7 @@ const sendEmail = async () => {
   >
     <h4 style="text-align: center">修改密码</h4>
     <p class="tips">
-      我们会向您的邮箱地址<span class="old-email">{{ props.email }}</span
-      >发送一封包含<b>修改密码链接</b>的邮件，请点击该链接修改密码。
+      我们会向您的邮箱地址发送一封包含<b>修改密码链接</b>的邮件，请点击该链接修改密码。
     </p>
     <van-button
       type="primary"
